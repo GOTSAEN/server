@@ -48,4 +48,13 @@ public class Member extends Auditable {
         this.avatarUri = avatarUri;
         this.roles = roles;
     }
+
+    public Member update(String nickname){
+        this.nickname = nickname;
+        return this;
+    }
+
+    public Member(String email) {
+        this.email = email;
+    }
 }

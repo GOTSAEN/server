@@ -7,7 +7,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @OpenAPIDefinition(info = @Info(title = "My API", version = "v1"),
 		security = @SecurityRequirement(name = "bearerAuth"))
