@@ -1,5 +1,6 @@
 package com.gotsaen.server.auth.service;
 
+
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.repository.MemberRepository;
@@ -21,6 +22,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
     private final HttpSession httpSession;
+
     private final CustomAuthorityUtils authorityUtils;
     @Autowired
     public OAuth2MemberService(MemberRepository memberRepository, HttpSession httpSession, CustomAuthorityUtils authorityUtils) {
@@ -33,6 +35,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest memberRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(memberRequest);
         String email = oAuth2User.getAttribute("email");
+
         System.out.println("-------------------------------------");
         System.out.println(oAuth2User.getName());
         System.out.println(oAuth2User.getAttributes());
@@ -40,6 +43,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         System.out.println("-------------------------------------");
         Optional<Member> findMember = memberRepository.findByEmail(email);
         List<String> authorities = authorityUtils.createRoles(email);
+
         if (findMember.isEmpty()) { //찾지 못했다면
             Member member = Member.builder()
                     .nickname(oAuth2User.getAttribute("name"))

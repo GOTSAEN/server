@@ -1,5 +1,6 @@
 package com.gotsaen.server.member.service;
 
+
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import com.gotsaen.server.event.MemberRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -11,9 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 public class MemberService {

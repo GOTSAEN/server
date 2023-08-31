@@ -3,7 +3,6 @@ package com.gotsaen.server.member.repository;
 import com.gotsaen.server.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 @Repository
