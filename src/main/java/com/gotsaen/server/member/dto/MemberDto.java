@@ -21,10 +21,7 @@ public class MemberDto {
         private String password;
 
         @NotBlank
-        private String nickname;
-
-        private String avatarUri;
-
-        private String channelId;
+        private String businessName;
+        private String businessNumber;
     }
 }

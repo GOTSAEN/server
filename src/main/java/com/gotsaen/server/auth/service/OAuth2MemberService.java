@@ -46,10 +46,8 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
         if (findMember.isEmpty()) { //찾지 못했다면
             Member member = Member.builder()
-                    .nickname(oAuth2User.getAttribute("name"))
                     .email(email)
                     .password("")
-                    .avatarUri(oAuth2User.getAttribute("picture"))
                     .roles(authorities).build();
             memberRepository.save(member);
         }
