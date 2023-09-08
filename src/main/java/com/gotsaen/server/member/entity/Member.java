@@ -26,31 +26,28 @@ public class Member extends Auditable {
     @Column(length = 100, nullable = true)
     private String password;
 
-    @Column(length = 10, nullable = false)
+    @Column(length = 20, nullable = false)
     @Size(min = 2)
-    private String nickname;
+    private String businessName;
 
-    @Column(length = 500, nullable = true)
-    private String avatarUri;
-
-    @Column
-    private String channelId;
+    @Column(length = 10, nullable = false)
+    private Long businessNumber;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 
     @Builder
-    public Member(Long memberId, String nickname, String email, String password, String avatarUri, List<String> roles) {
-        this.memberId = memberId;
-        this.nickname = nickname;
+    public Member(Long memberId, String businessName, String email, String password, Long businessNumber, List<String> roles) {
+        this.memberId = memberId;;
         this.email = email;
         this.password = password;
-        this.avatarUri = avatarUri;
+        this.businessName = businessName;
+        this.businessNumber = businessNumber;
         this.roles = roles;
     }
 
     public Member update(String nickname){
-        this.nickname = nickname;
+        this.businessName = nickname;
         return this;
     }
 
