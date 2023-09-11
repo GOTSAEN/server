@@ -22,7 +22,7 @@ public class Advertisement extends Auditable {
     private String productName;
 
     @Column(length = 3, nullable = false)
-    private Long personnel;
+    private Long numberOfRecruit;
 
     @Column(nullable = false)
     private Date startDate;
@@ -43,10 +43,10 @@ public class Advertisement extends Auditable {
     private String precaution;
 
     @Builder
-    public Advertisement(Long advertisementId, String productName, Long personnel,Date startDate, Date endDate, String category, String offer, String productDescription, String precaution) {
+    public Advertisement(Long advertisementId, String productName, Long numberOfRecruit, Date startDate, Date endDate, String category, String offer, String productDescription, String precaution) {
         this.advertisementId = advertisementId;
         this.productName = productName;
-        this.personnel = personnel;
+        this.numberOfRecruit = numberOfRecruit;
         this.startDate = startDate;
         this.endDate = endDate;
         this.category = category;
