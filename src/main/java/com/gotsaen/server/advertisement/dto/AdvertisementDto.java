@@ -12,7 +12,7 @@ public class AdvertisementDto {
     public static class Post {
         @NotBlank
         private String productName;
-        private Long personnel;
+        private Long numberOfRecruit;
         private Date startDate;
         private Date endDate;
         private String category;
