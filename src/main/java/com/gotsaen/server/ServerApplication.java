@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 @OpenAPIDefinition(info = @Info(title = "My API", version = "v1"),
 		security = @SecurityRequirement(name = "bearerAuth"))
 @SecurityScheme(
@@ -20,6 +24,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class ServerApplication {
 
+	@PostConstruct
+	public void started(){
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+	}
 	public static void main(String[] args) {
 		SpringApplication.run(ServerApplication.class, args);
 	}
