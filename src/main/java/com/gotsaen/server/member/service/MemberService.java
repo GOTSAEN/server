@@ -5,6 +5,8 @@ import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import com.gotsaen.server.event.MemberRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
+import com.gotsaen.server.member.dto.MemberDto;
+import com.gotsaen.server.member.dto.UpdateMemberDto;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.repository.MemberRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -45,7 +47,6 @@ public class MemberService {
 
         Member savedMember = memberRepository.save(member);
 
-
         publisher.publishEvent(new MemberRegistrationApplicationEvent(savedMember));
         return savedMember;
     }
@@ -54,5 +55,33 @@ public class MemberService {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent())
             throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);
+    }
+
+    @Transactional
+    public Optional<Member> updateMember(Long memberId, UpdateMemberDto updateMemberDto) {
+        Optional<Member> updateMember = memberRepository.findByMemberId(memberId);
+
+        if (updateMember.isPresent()) {
+            Member existingMember = updateMember.get();
+
+            String newPassword = updateMemberDto.getNewPassword();
+            String newBusinessName = updateMemberDto.getNewBusinessName();
+            String newBusinessAddress = updateMemberDto.getNewBusinessAddress();
+
+            if (newPassword != null) {
+                String encryptedPassword = passwordEncoder.encode(newPassword);
+                existingMember.setPassword(encryptedPassword);
+            }
+            if (newBusinessName != null) {
+                existingMember.setBusinessName(newBusinessName);
+            }
+            if (newBusinessAddress != null) {
+                existingMember.setBusinessAddress(newBusinessAddress);
+            }
+
+            return Optional.of(memberRepository.save(existingMember));
+        } else {
+            return Optional.empty();
+        }
     }
 }

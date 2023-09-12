@@ -1,20 +1,20 @@
 package com.gotsaen.server.member.controller;
 
+import com.gotsaen.server.member.dto.UpdateMemberDto;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.mapper.MemberMapper;
 import com.gotsaen.server.member.service.MemberService;
 import com.gotsaen.server.member.dto.MemberDto;
 import com.gotsaen.server.utils.UriCreator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/members")
@@ -38,5 +38,11 @@ public class MemberController {
         URI location = UriCreator.createUri(MEMBER_DEFAULT_URL, createdMember.getMemberId());
 
         return ResponseEntity.created(location).build();
+    }
+
+    @PatchMapping("/{memberId}")
+    public ResponseEntity<Member> patchMember( @PathVariable Long memberId, @RequestBody UpdateMemberDto updateDto) {
+        Optional<Member> updatedMember = memberService.updateMember(memberId, updateDto);
+        return updatedMember.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 }
