@@ -46,7 +46,7 @@ public class Member extends Auditable {
         this.roles = roles;
     }
 
-    public void updateMember(String newPassword, String newBusinessName, String newBusinessAddress) {
+    public void update(String newPassword, String newBusinessName, String newBusinessAddress) {
         this.password = newPassword;
         this.businessName = newBusinessName;
         this.businessAddress = newBusinessAddress;

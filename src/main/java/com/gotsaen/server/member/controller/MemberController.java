@@ -1,6 +1,8 @@
 package com.gotsaen.server.member.controller;
 
-import com.gotsaen.server.member.dto.UpdateMemberDto;
+import com.gotsaen.server.exception.BusinessLogicException;
+import com.gotsaen.server.member.dto.MemberResponseDto;
+import com.gotsaen.server.member.dto.MemberUpdateDto;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.mapper.MemberMapper;
 import com.gotsaen.server.member.service.MemberService;
@@ -9,12 +11,14 @@ import com.gotsaen.server.utils.UriCreator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/members")
@@ -31,7 +35,7 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity postMember(@Valid @RequestBody MemberDto.Post requestBody){
+    public ResponseEntity<Member> postMember(@Valid @RequestBody MemberDto.Post requestBody){
         Member member = memberMapper.memberPostToMember(requestBody);
 
         Member createdMember = memberService.createMember(member);
@@ -41,8 +45,22 @@ public class MemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity<Member> patchMember( @PathVariable Long memberId, @RequestBody UpdateMemberDto updateDto) {
-        Optional<Member> updatedMember = memberService.updateMember(memberId, updateDto);
-        return updatedMember.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+    public ResponseEntity<?> updateMember(@PathVariable Long memberId, @RequestBody MemberUpdateDto updateDto) {
+        try {
+            Member updatedMember = memberService.updateMember(memberId, updateDto);
+            return ResponseEntity.ok(updatedMember);
+        } catch (BusinessLogicException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
+        }
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<?> getMember(@PathVariable Long memberId) {
+        try {
+            MemberResponseDto getMember = memberService.getMember(memberId);
+            return ResponseEntity.ok(getMember);
+        } catch (BusinessLogicException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
+        }
     }
 }
