@@ -1,11 +1,13 @@
 package com.gotsaen.server.advertisement.controller;
 
 import com.gotsaen.server.advertisement.dto.AdvertisementDto;
+import com.gotsaen.server.advertisement.dto.AdvertisementResponseDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.service.AdvertisementService;
 import com.gotsaen.server.exception.BusinessLogicException;
+import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.dto.MemberUpdateDto;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.utils.UriCreator;
@@ -49,6 +51,16 @@ public class AdvertisementController {
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found");
+        }
+    }
+
+    @GetMapping("/{advertisementId}")
+    public ResponseEntity<?> getAdvertisement(@PathVariable Long advertisementId) {
+        try {
+            AdvertisementResponseDto getAdvertisement = advertisementService.getAdvertisement(advertisementId);
+            return ResponseEntity.ok(getAdvertisement);
+        } catch (BusinessLogicException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
         }
     }
 }
