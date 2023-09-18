@@ -54,9 +54,13 @@ public class Advertisement extends Auditable {
         this.productDescription = productDescription;
         this.precaution = precaution;
     }
-    public Advertisement update(String productName){
-        this.productName = productName;
-        return this;
+    public void update(Long newNumberOfRecruit, Date newEndDate, String newCategory, String newOffer, String newProductDescription, String newPrecaution){
+        this.numberOfRecruit = newNumberOfRecruit;
+        this.endDate = newEndDate;
+        this.category = newCategory;
+        this.offer = newOffer;
+        this.productDescription = newProductDescription;
+        this.precaution = newPrecaution;
     }
 
     public Advertisement(Long advertisementId) {
