@@ -49,6 +49,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
                     String newRefreshToken = jwtTokenizer.delegateRefreshToken(username);
                     response.setHeader("Authorization", "Bearer " + newAccessToken);
                     response.setHeader("Refresh", newRefreshToken);
+                    if(request.getHeader("userType").equals("advertisement")){
+                        response.setHeader("userType", "advertisement");
+                    }
+                    else{
+                        response.setHeader("userType", "youtuber");
+                    }
 
                 } catch (ExpiredJwtException e) {
                     throw new ServletException("Refresh token expired");

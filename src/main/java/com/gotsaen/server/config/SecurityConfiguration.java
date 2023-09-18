@@ -6,6 +6,8 @@ import com.gotsaen.server.auth.handler.*;
 import com.gotsaen.server.auth.jwt.JwtTokenizer;
 import com.gotsaen.server.auth.service.OAuth2MemberService;
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
+import com.gotsaen.server.member.repository.YoutubeMemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,20 +26,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtTokenizer jwtTokenizer;
-
     private final CustomAuthorityUtils authorityUtils;
-    @Autowired
     private final OAuth2MemberService oauthMemberService;
-    @Autowired
-    public SecurityConfiguration(JwtTokenizer jwtTokenizer,
-                                 CustomAuthorityUtils authorityUtils, OAuth2MemberService oauthMemberService) {
-        this.jwtTokenizer = jwtTokenizer;
-        this.authorityUtils = authorityUtils;
-        this.oauthMemberService = oauthMemberService;
-    }
-
+    private final YoutubeMemberRepository youtubeMemberRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,7 +61,7 @@ public class SecurityConfiguration {
                         .userInfoEndpoint()
                         .userService(oauthMemberService)
                         .and()
-                        .successHandler(new OAuth2AuthenticationSuccessHandler(jwtTokenizer, authorityUtils))
+                        .successHandler(new OAuth2AuthenticationSuccessHandler(jwtTokenizer, authorityUtils, youtubeMemberRepository))
                 );
         return http.build();
     }

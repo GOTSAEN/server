@@ -3,7 +3,9 @@ package com.gotsaen.server.auth.service;
 
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import com.gotsaen.server.member.entity.Member;
+import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.repository.MemberRepository;
+import com.gotsaen.server.member.repository.YoutubeMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -19,14 +21,14 @@ import java.util.Optional;
 @Service
 public class OAuth2MemberService extends DefaultOAuth2UserService {
 
-    private final MemberRepository memberRepository;
+    private final YoutubeMemberRepository youtubeMemberRepository;
 
     private final HttpSession httpSession;
 
     private final CustomAuthorityUtils authorityUtils;
     @Autowired
-    public OAuth2MemberService(MemberRepository memberRepository, HttpSession httpSession, CustomAuthorityUtils authorityUtils) {
-        this.memberRepository = memberRepository;
+    public OAuth2MemberService(YoutubeMemberRepository youtubeMemberRepository, HttpSession httpSession, CustomAuthorityUtils authorityUtils) {
+        this.youtubeMemberRepository = youtubeMemberRepository;
         this.httpSession = httpSession;
         this.authorityUtils = authorityUtils;
     }
@@ -41,15 +43,16 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         System.out.println(oAuth2User.getAttributes());
 
         System.out.println("-------------------------------------");
-        Optional<Member> findMember = memberRepository.findByEmail(email);
+        Optional<YoutubeMember> findYoutubeMember = youtubeMemberRepository.findByEmail(email);
         List<String> authorities = authorityUtils.createRoles(email);
-
-        if (findMember.isEmpty()) { //찾지 못했다면
-            Member member = Member.builder()
+        String nickname = oAuth2User.getAttribute("name");
+        String avatarUri = oAuth2User.getAttribute("picture");
+        if (findYoutubeMember.isEmpty()) { //찾지 못했다면
+            YoutubeMember youtubeMember = YoutubeMember.builder()
+                    .nickname(nickname)
                     .email(email)
-                    .password("")
-                    .roles(authorities).build();
-            memberRepository.save(member);
+                    .avatarUri(avatarUri).build();
+            youtubeMemberRepository.save(youtubeMember);
         }
         return oAuth2User;
     }

@@ -50,6 +50,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
+        response.setHeader("userType", "advertisement");
 
         this.getSuccessHandler().onAuthenticationSuccess(request, response, authResult);
     }
@@ -58,7 +59,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private String delegateAccessToken(Member member) {
         Map<String, Object> claims = new HashMap<>();
-//        claims.put("memberId", member.getMemberId());  // 식별자도 포함할 수 있다.
+        claims.put("memberId", member.getMemberId());  // 식별자도 포함할 수 있다.
         claims.put("email", member.getEmail());
         claims.put("roles", member.getRoles());
 
