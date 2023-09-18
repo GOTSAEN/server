@@ -1,7 +1,9 @@
 package com.gotsaen.server.advertisement.service;
 
+import com.gotsaen.server.advertisement.dto.AdvertisementResponseDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
+import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
 import com.gotsaen.server.event.AdvertisementRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -17,10 +19,12 @@ import java.util.Optional;
 @Service
 public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
+    private final AdvertisementMapper advertisementMapper;
     private final ApplicationEventPublisher publisher;
 
-    public AdvertisementService(AdvertisementRepository advertisementRepository, ApplicationEventPublisher publisher) {
+    public AdvertisementService(AdvertisementRepository advertisementRepository, AdvertisementMapper advertisementMapper, ApplicationEventPublisher publisher) {
         this.advertisementRepository = advertisementRepository;
+        this.advertisementMapper = advertisementMapper;
         this.publisher = publisher;
     }
 
@@ -51,5 +55,13 @@ public class AdvertisementService {
         } else {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }
+    }
+
+    public AdvertisementResponseDto getAdvertisement(Long advertisementId) {
+        Advertisement advertisement = advertisementRepository.findById(advertisementId).orElse(null);
+        if (advertisement == null) {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+        return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
     }
 }
