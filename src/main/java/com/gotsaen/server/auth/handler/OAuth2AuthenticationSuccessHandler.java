@@ -51,7 +51,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String refreshToken = delegateRefreshToken(username);
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
-        response.setHeader("userType", "youtuber");
+        response.setHeader("UserType", "youtuber");
         String uri = createURI().toString();
         getRedirectStrategy().sendRedirect(request, response, uri);
     }

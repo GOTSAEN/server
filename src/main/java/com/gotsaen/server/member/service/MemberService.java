@@ -10,6 +10,7 @@ import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.mapper.MemberMapper;
 import com.gotsaen.server.member.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,21 +24,13 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final CustomAuthorityUtils authorityUtils;
-
-    @Autowired
-    public MemberService(MemberRepository memberRepository, MemberMapper memberMapper, ApplicationEventPublisher publisher, PasswordEncoder passwordEncoder, CustomAuthorityUtils authorityUtils) {
-        this.memberRepository = memberRepository;
-        this.memberMapper = memberMapper;
-        this.publisher = publisher;
-        this.passwordEncoder = passwordEncoder;
-        this.authorityUtils = authorityUtils;
-    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Member createMember(Member member) {
@@ -64,8 +57,8 @@ public class MemberService {
             throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);
     }
 
-    public MemberResponseDto getMember(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElse(null);
+    public MemberResponseDto getMember(String memberEmail) {
+        Member member = memberRepository.findByEmail(memberEmail).orElse(null);
         if (member == null) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }
@@ -73,17 +66,27 @@ public class MemberService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
-    public Member updateMember(Long memberId, MemberUpdateDto updateDto) {
-        Optional<Member> optionalMember = memberRepository.findById(memberId);
+    public Member updateMember(String memberEmail, MemberUpdateDto updateDto) {
+        Member findMember = findMemberByEmail(memberEmail);
+        updateDto.setMemberId(findMember.getMemberId());
+        Member updateMember = memberMapper.memberUpdateToMember(updateDto);
 
-        if (optionalMember.isPresent()) {
-            Member existingMember = optionalMember.get();
-            //System.out.println("Updating member with ID: " + existingMember);
-            existingMember.update(updateDto.getNewPassword(), updateDto.getNewBusinessName(), updateDto.getNewBusinessAddress());
+        Optional.ofNullable(updateMember.getPassword())
+                .ifPresent(password -> findMember.setPassword(password));
+        Optional.ofNullable(updateMember.getBusinessName())
+                .ifPresent(businessName -> findMember.setBusinessName(businessName));
+        Optional.ofNullable(updateMember.getBusinessAddress())
+                .ifPresent(businessAddress -> findMember.setBusinessAddress(businessAddress));
 
-            return memberRepository.save(existingMember);
-        } else {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
+        return memberRepository.save(findMember);
+    }
+    @Transactional(readOnly = true)
+    public Member findMemberByEmail(String email) {
+        Optional<Member> optionalMember =
+                memberRepository.findByEmail(email);
+        Member findMember =
+                optionalMember.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        return findMember;
     }
 }
