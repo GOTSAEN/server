@@ -2,16 +2,19 @@ package com.gotsaen.server.advertisement.controller;
 
 import com.gotsaen.server.advertisement.dto.AdvertisementDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementResponseDto;
+import com.gotsaen.server.advertisement.dto.AdvertisementSummaryDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.service.AdvertisementService;
+import com.gotsaen.server.dto.MultiResponseDto;
+import com.gotsaen.server.dto.PageInfo;
 import com.gotsaen.server.exception.BusinessLogicException;
-import com.gotsaen.server.member.dto.MemberResponseDto;
-import com.gotsaen.server.member.dto.MemberUpdateDto;
-import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.utils.UriCreator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/advertisement")
@@ -35,7 +39,7 @@ public class AdvertisementController {
     }
 
     @PostMapping
-    public ResponseEntity<Advertisement> postAdvertisement(@Valid @RequestBody AdvertisementDto.Post requestBody){
+    public ResponseEntity<Advertisement> postAdvertisement(@Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
 
         Advertisement createdAdvertisement = advertisementService.createAdvertisement(advertisement);
@@ -62,5 +66,21 @@ public class AdvertisementController {
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
         }
+    }
+
+    @GetMapping("/allAd")
+    public ResponseEntity<MultiResponseDto<AdvertisementSummaryDto>> getAllAdvertisementSummaries(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        MultiResponseDto<AdvertisementSummaryDto> advertisementResponse = advertisementService.getAllAdvertisementSummaries(page, size);
+
+        // 페이지 정보를 헤더에 추가
+        PageInfo pageInfo = advertisementResponse.getPageInfo();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Page-Info", pageInfo.toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(advertisementResponse);
     }
 }
