@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
-        response.setHeader("userType", "advertisement");
+        response.setHeader("UserType", "advertisement");
 
         this.getSuccessHandler().onAuthenticationSuccess(request, response, authResult);
     }
@@ -69,7 +69,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String base64EncodedSecretKey = jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey());
 
         String accessToken = jwtTokenizer.generateAccessToken(claims, subject, expiration, base64EncodedSecretKey);
-
         return accessToken;
     }
 

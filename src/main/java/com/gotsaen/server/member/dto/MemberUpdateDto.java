@@ -9,11 +9,14 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @Getter
 public class MemberUpdateDto {
+    private long memberId;
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$")
-    private String newPassword;
+    private String password;
 
-    private String newBusinessName;
+    private String businessName;
 
-    private String newBusinessAddress;
-
+    private String businessAddress;
+    public void setMemberId(long memberId) {
+        this.memberId = memberId;
+    }
 }
