@@ -83,4 +83,20 @@ public class AdvertisementController {
                 .headers(headers)
                 .body(advertisementResponse);
     }
+
+    @GetMapping("/byCategory")
+    public ResponseEntity<MultiResponseDto<AdvertisementSummaryDto>> getAdvertisementsByCategory(
+            @RequestParam(name = "category") String category,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        MultiResponseDto<AdvertisementSummaryDto> advertisementResponse = advertisementService.getAdvertisementsByCategory(category, page, size);
+
+        PageInfo pageInfo = advertisementResponse.getPageInfo();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Page-Info", pageInfo.toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(advertisementResponse);
+    }
 }

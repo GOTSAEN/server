@@ -83,4 +83,16 @@ public class AdvertisementService {
 
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
+
+    @Transactional(readOnly = true)
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsByCategory(String category, int page, int size) {
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Advertisement> advertisementPage = advertisementRepository.findByCategory(category, pageable);
+
+        List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
+                .map(advertisementMapper::advertisementToAdvertisementSummaryDto)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
+    }
 }
