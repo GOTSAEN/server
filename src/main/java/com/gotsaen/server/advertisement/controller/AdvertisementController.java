@@ -12,8 +12,6 @@ import com.gotsaen.server.dto.PageInfo;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.utils.UriCreator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/advertisement")
@@ -98,5 +95,15 @@ public class AdvertisementController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(advertisementResponse);
+    }
+
+    @DeleteMapping("/{advertisementId}")
+    public ResponseEntity<?> deleteAdvertisement(@PathVariable Long advertisementId) {
+        try {
+            advertisementService.deleteAdvertisement(advertisementId);
+            return ResponseEntity.noContent().build();
+        } catch (BusinessLogicException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("광고를 찾을 수 없습니다.");
+        }
     }
 }

@@ -95,4 +95,16 @@ public class AdvertisementService {
 
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
+
+    @Transactional
+    public void deleteAdvertisement(Long advertisementId) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+
+        if (optionalAdvertisement.isPresent()) {
+            Advertisement advertisement = optionalAdvertisement.get();
+            advertisementRepository.delete(advertisement);
+        } else {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+    }
 }
