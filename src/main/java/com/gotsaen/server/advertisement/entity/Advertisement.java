@@ -42,6 +42,9 @@ public class Advertisement extends Auditable {
     @Column(length = 1000, nullable = false)
     private String precaution;
 
+    @Column
+    private Long memberId;
+
     @Builder
     public Advertisement(Long advertisementId, String productName, Long numberOfRecruit, Date startDate, Date endDate, String category, String offer, String productDescription, String precaution) {
         this.advertisementId = advertisementId;
