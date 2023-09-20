@@ -13,6 +13,7 @@ import com.gotsaen.server.exception.ExceptionCode;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -73,7 +74,7 @@ public class AdvertisementService {
 
     @Transactional(readOnly = true)
     public MultiResponseDto<AdvertisementSummaryDto> getAllAdvertisementSummaries(int page, int size) {
-        PageRequest pageable = PageRequest.of(page - 1, size);
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Advertisement> advertisementPage = advertisementRepository.findAll(pageable);
 
         List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
