@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
    Page<Advertisement> findAll(Pageable pageable);
+   Page<Advertisement> findByCategory(String category, Pageable pageable);
 }
