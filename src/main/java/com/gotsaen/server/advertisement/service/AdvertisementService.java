@@ -36,16 +36,16 @@ public class AdvertisementService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Advertisement createAdvertisement(Advertisement advertisement) {
+    public Advertisement createAdvertisement(String memberId, Advertisement advertisement) {
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
-
+        advertisement.setMemberId(memberId);
         publisher.publishEvent(new AdvertisementRegistrationApplicationEvent(savedAdvertisement));
         return savedAdvertisement;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
-    public Advertisement updateAdvertisement(Long advertisementId, AdvertisementUpdateDto updateDto) {
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+    public Advertisement updateAdvertisement(String memberId, AdvertisementUpdateDto updateDto) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberId);
 
         if (optionalAdvertisement.isPresent()) {
             Advertisement existingAdvertisement = optionalAdvertisement.get();
@@ -64,8 +64,8 @@ public class AdvertisementService {
         }
     }
 
-    public AdvertisementResponseDto getAdvertisement(Long advertisementId) {
-        Advertisement advertisement = advertisementRepository.findById(advertisementId).orElse(null);
+    public AdvertisementResponseDto getAdvertisement(String memberId) {
+        Advertisement advertisement = advertisementRepository.findByMemberId(memberId).orElse(null);
         if (advertisement == null) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }
@@ -97,8 +97,8 @@ public class AdvertisementService {
     }
 
     @Transactional
-    public void deleteAdvertisement(Long advertisementId) {
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+    public void deleteAdvertisement(String memberId) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberId);
 
         if (optionalAdvertisement.isPresent()) {
             Advertisement advertisement = optionalAdvertisement.get();

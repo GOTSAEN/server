@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,29 +37,29 @@ public class AdvertisementController {
     }
 
     @PostMapping
-    public ResponseEntity<Advertisement> postAdvertisement(@Valid @RequestBody AdvertisementDto.Post requestBody) {
+    public ResponseEntity<Advertisement> postAdvertisement(@AuthenticationPrincipal String memberId, @Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
 
-        Advertisement createdAdvertisement = advertisementService.createAdvertisement(advertisement);
+        Advertisement createdAdvertisement = advertisementService.createAdvertisement(memberId, advertisement);
         URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
 
         return ResponseEntity.created(location).build();
     }
 
-    @PatchMapping("/{advertisementId}")
-    public ResponseEntity<?> updateAdvertisement(@PathVariable Long advertisementId, @RequestBody AdvertisementUpdateDto updateDto) {
+    @PatchMapping
+    public ResponseEntity<?> updateAdvertisement(@AuthenticationPrincipal String memberId, @RequestBody AdvertisementUpdateDto updateDto) {
         try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(advertisementId, updateDto);
+            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberId, updateDto);
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found");
         }
     }
 
-    @GetMapping("/{advertisementId}")
-    public ResponseEntity<?> getAdvertisement(@PathVariable Long advertisementId) {
+    @GetMapping
+    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberId) {
         try {
-            AdvertisementResponseDto getAdvertisement = advertisementService.getAdvertisement(advertisementId);
+            AdvertisementResponseDto getAdvertisement = advertisementService.getAdvertisement(memberId);
             return ResponseEntity.ok(getAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
@@ -97,10 +98,10 @@ public class AdvertisementController {
                 .body(advertisementResponse);
     }
 
-    @DeleteMapping("/{advertisementId}")
-    public ResponseEntity<?> deleteAdvertisement(@PathVariable Long advertisementId) {
+    @DeleteMapping
+    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberId) {
         try {
-            advertisementService.deleteAdvertisement(advertisementId);
+            advertisementService.deleteAdvertisement(memberId);
             return ResponseEntity.noContent().build();
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("광고를 찾을 수 없습니다.");
