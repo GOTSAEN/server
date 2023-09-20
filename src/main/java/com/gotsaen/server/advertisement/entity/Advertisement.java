@@ -43,7 +43,7 @@ public class Advertisement extends Auditable {
     private String precaution;
 
     @Column
-    private Long memberId;
+    private String memberId;
 
     @Builder
     public Advertisement(Long advertisementId, String productName, Long numberOfRecruit, Date startDate, Date endDate, String category, String offer, String productDescription, String precaution) {
