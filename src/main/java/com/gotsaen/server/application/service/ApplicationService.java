@@ -55,4 +55,9 @@ public class ApplicationService {
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(applications, applicationsPage);
     }
+
+    @Transactional(readOnly = true)
+    public int getApplicationCountByAdvertisementId(Long advertisementId) {
+        return applicationRepository.countByAdvertisementId(advertisementId);
+    }
 }
