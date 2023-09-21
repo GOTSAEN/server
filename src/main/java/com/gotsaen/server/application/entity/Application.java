@@ -23,4 +23,10 @@ public class Application extends Auditable {
     private Long advertisementId;
     @Column
     private Long youtubeMemberId;
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.WAIT;
+    @Getter
+    public enum Status {
+        WAIT, PROGRESS, FINISHED;
+    }
 }
