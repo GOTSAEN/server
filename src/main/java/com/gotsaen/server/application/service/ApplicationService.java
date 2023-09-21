@@ -5,13 +5,21 @@ import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
 import com.gotsaen.server.application.dto.ApplicationDto;
 import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.application.repository.ApplicationRepository;
+import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
 import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.repository.YoutubeMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +46,13 @@ public class ApplicationService {
             application.setYoutubeMemberId(youtubeMember.getYoutubeMemberId());
             applicationRepository.save(application);
         }
+    }
+
+    public MultiResponseDto findByStatus(Application.Status status, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Application> applicationsPage = applicationRepository.findByStatus(status, pageable);
+        List<Application> applications = applicationsPage.getContent().stream()
+                .collect(Collectors.toList());
+        return new MultiResponseDto<>(applications, applicationsPage);
     }
 }
