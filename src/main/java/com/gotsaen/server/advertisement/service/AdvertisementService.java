@@ -6,6 +6,7 @@ import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.application.service.ApplicationService;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.AdvertisementRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -35,6 +36,7 @@ public class AdvertisementService {
     private final ApplicationEventPublisher publisher;
 
     private final MemberService memberService;
+    private final ApplicationService applicationService;
 
 
     @Transactional(propagation = Propagation.REQUIRED)
