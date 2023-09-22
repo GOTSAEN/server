@@ -10,8 +10,10 @@ import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.AdvertisementRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
+
 import com.gotsaen.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +33,9 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
     private final ApplicationEventPublisher publisher;
+
     private final MemberService memberService;
+
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Advertisement createAdvertisement(String memberEmail, Advertisement advertisement) {
@@ -76,7 +80,12 @@ public class AdvertisementService {
         Page<Advertisement> advertisementPage = advertisementRepository.findAll(pageable);
 
         List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
-                .map(advertisementMapper::advertisementToAdvertisementSummaryDto)
+                .map(advertisement -> {
+                    int numberOfApplicants = getAdvertisementApplicationCount(advertisement.getAdvertisementId());
+                    AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
+                    summaryDto.setNumberOfApplicants(numberOfApplicants);
+                    return summaryDto;
+                })
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
@@ -101,6 +110,17 @@ public class AdvertisementService {
         if (optionalAdvertisement.isPresent()) {
             Advertisement advertisement = optionalAdvertisement.get();
             advertisementRepository.delete(advertisement);
+        } else {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+    }
+
+    public int getAdvertisementApplicationCount(Long advertisementId) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+
+        if (optionalAdvertisement.isPresent()) {
+            Advertisement advertisement = optionalAdvertisement.get();
+            return applicationService.getApplicationCountByAdvertisementId(advertisement.getAdvertisementId());
         } else {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }

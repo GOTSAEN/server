@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     Application findByYoutubeMemberIdAndAdvertisementId(Long youtubeMemberId, Long advertisementId);
-
     Page<Application> findByStatus(Application.Status status, Pageable pageable);
+    int countByAdvertisementId(Long advertisementId);
 }
