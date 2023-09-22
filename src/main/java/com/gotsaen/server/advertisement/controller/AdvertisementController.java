@@ -37,19 +37,19 @@ public class AdvertisementController {
     }
 
     @PostMapping
-    public ResponseEntity<Advertisement> postAdvertisement(@AuthenticationPrincipal String memberId, @Valid @RequestBody AdvertisementDto.Post requestBody) {
+    public ResponseEntity<Advertisement> postAdvertisement(@AuthenticationPrincipal String memberEmail, @Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
 
-        Advertisement createdAdvertisement = advertisementService.createAdvertisement(memberId, advertisement);
+        Advertisement createdAdvertisement = advertisementService.createAdvertisement(memberEmail, advertisement);
         URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
 
         return ResponseEntity.created(location).build();
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateAdvertisement(@AuthenticationPrincipal String memberId, @RequestBody AdvertisementUpdateDto updateDto) {
+    public ResponseEntity<?> updateAdvertisement(@AuthenticationPrincipal String memberEmail, @RequestBody AdvertisementUpdateDto updateDto) {
         try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberId, updateDto);
+            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberEmail, updateDto);
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found");
