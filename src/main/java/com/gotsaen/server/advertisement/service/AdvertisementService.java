@@ -10,7 +10,10 @@ import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.AdvertisementRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
-import com.gotsaen.server.application.service.ApplicationService;
+
+import com.gotsaen.server.member.service.MemberService;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,31 +28,26 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
     private final ApplicationEventPublisher publisher;
-    private final ApplicationService applicationService;
 
-    public AdvertisementService(AdvertisementRepository advertisementRepository, AdvertisementMapper advertisementMapper,
-                                ApplicationEventPublisher publisher, ApplicationService applicationService) {
-        this.advertisementRepository = advertisementRepository;
-        this.advertisementMapper = advertisementMapper;
-        this.publisher = publisher;
-        this.applicationService = applicationService;
-    }
+    private final MemberService memberService;
+
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Advertisement createAdvertisement(String memberId, Advertisement advertisement) {
+    public Advertisement createAdvertisement(String memberEmail, Advertisement advertisement) {
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
-        advertisement.setMemberId(memberId);
+        advertisement.setMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
         publisher.publishEvent(new AdvertisementRegistrationApplicationEvent(savedAdvertisement));
         return savedAdvertisement;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
-    public Advertisement updateAdvertisement(String memberId, AdvertisementUpdateDto updateDto) {
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberId);
+    public Advertisement updateAdvertisement(String memberEmail, AdvertisementUpdateDto updateDto) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
 
         if (optionalAdvertisement.isPresent()) {
             Advertisement existingAdvertisement = optionalAdvertisement.get();
@@ -68,8 +66,8 @@ public class AdvertisementService {
         }
     }
 
-    public AdvertisementResponseDto getAdvertisement(String memberId) {
-        Advertisement advertisement = advertisementRepository.findByMemberId(memberId).orElse(null);
+    public AdvertisementResponseDto getAdvertisement(String memberEmail) {
+        Advertisement advertisement = advertisementRepository.findByMemberId(memberService.findMemberByEmail(memberEmail).getMemberId()).orElse(null);
         if (advertisement == null) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }
@@ -106,8 +104,8 @@ public class AdvertisementService {
     }
 
     @Transactional
-    public void deleteAdvertisement(String memberId) {
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberId);
+    public void deleteAdvertisement(String memberEmail) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
 
         if (optionalAdvertisement.isPresent()) {
             Advertisement advertisement = optionalAdvertisement.get();

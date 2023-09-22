@@ -43,7 +43,14 @@ public class Advertisement extends Auditable {
     private String precaution;
 
     @Column
-    private String memberId;
+    private Long memberId;
+
+    @Enumerated(EnumType.STRING)
+    private Advertisement.Status status = Advertisement.Status.WAITING;
+    @Getter
+    public enum Status {
+        WAITING, PROGRESS, FINISHED;
+    }
 
     @Builder
     public Advertisement(Long advertisementId, String productName, Long numberOfRecruit, Date startDate, Date endDate, String category, String offer, String productDescription, String precaution) {

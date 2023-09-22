@@ -1,5 +1,7 @@
 package com.gotsaen.server.member.controller;
 
+import com.gotsaen.server.advertisement.entity.Advertisement;
+import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.dto.MemberUpdateDto;
@@ -60,5 +62,16 @@ public class MemberController {
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
         }
+    }
+
+    @GetMapping("/ad")
+    public ResponseEntity<MultiResponseDto> getAdvertisementsByMember(
+            @AuthenticationPrincipal String memberEmail,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "1000") int size,
+            @RequestParam Advertisement.Status status){
+        MultiResponseDto advertisements = memberService.findAdvertisementByMember(memberEmail, page, size, status);
+
+        return new ResponseEntity<>(advertisements,HttpStatus.OK);
     }
 }

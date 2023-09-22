@@ -1,7 +1,11 @@
 package com.gotsaen.server.member.service;
 
 
+import com.gotsaen.server.advertisement.entity.Advertisement;
+import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
+import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.MemberRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
@@ -13,6 +17,10 @@ import com.gotsaen.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -31,6 +40,7 @@ public class MemberService {
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final CustomAuthorityUtils authorityUtils;
+    private final AdvertisementRepository advertisementRepository;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Member createMember(Member member) {
@@ -88,5 +98,14 @@ public class MemberService {
                 optionalMember.orElseThrow(() ->
                         new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
         return findMember;
+    }
+
+    public MultiResponseDto findAdvertisementByMember(String memberEmail, int page, int size, Advertisement.Status status) {
+        Member findMember = findMemberByEmail(memberEmail);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Advertisement> advertisementsPage = advertisementRepository.findByStatusAndMemberId(status, findMember.getMemberId(), pageable);
+        List<Advertisement> advertisements = advertisementsPage.getContent().stream()
+                .collect(Collectors.toList());
+        return new MultiResponseDto<>(advertisements, advertisementsPage);
     }
 }
