@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -82,11 +83,11 @@ public class MemberService {
         Member updateMember = memberMapper.memberUpdateToMember(updateDto);
 
         Optional.ofNullable(updateMember.getPassword())
-                .ifPresent(password -> findMember.setPassword(password));
+                .ifPresent(findMember::setPassword);
         Optional.ofNullable(updateMember.getBusinessName())
-                .ifPresent(businessName -> findMember.setBusinessName(businessName));
+                .ifPresent(findMember::setBusinessName);
         Optional.ofNullable(updateMember.getBusinessAddress())
-                .ifPresent(businessAddress -> findMember.setBusinessAddress(businessAddress));
+                .ifPresent(findMember::setBusinessAddress);
 
         return memberRepository.save(findMember);
     }
@@ -94,18 +95,15 @@ public class MemberService {
     public Member findMemberByEmail(String email) {
         Optional<Member> optionalMember =
                 memberRepository.findByEmail(email);
-        Member findMember =
-                optionalMember.orElseThrow(() ->
+        return optionalMember.orElseThrow(() ->
                         new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
-        return findMember;
     }
 
     public MultiResponseDto findAdvertisementByMember(String memberEmail, int page, int size, Advertisement.Status status) {
         Member findMember = findMemberByEmail(memberEmail);
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Advertisement> advertisementsPage = advertisementRepository.findByStatusAndMemberId(status, findMember.getMemberId(), pageable);
-        List<Advertisement> advertisements = advertisementsPage.getContent().stream()
-                .collect(Collectors.toList());
+        List<Advertisement> advertisements = new ArrayList<>(advertisementsPage.getContent());
         return new MultiResponseDto<>(advertisements, advertisementsPage);
     }
 }
