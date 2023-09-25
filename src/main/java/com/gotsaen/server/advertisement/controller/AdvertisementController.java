@@ -46,8 +46,8 @@ public class AdvertisementController {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/getAd")
-    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberEmail, @RequestParam Long advertisementId) {
+    @GetMapping("/{advertisementId}")
+    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
         try {
             AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(memberEmail, advertisementId);
             return ResponseEntity.ok(advertisementResponseDto);
@@ -57,10 +57,10 @@ public class AdvertisementController {
     }
 
 
-    @PatchMapping("/update")
+    @PatchMapping("/{advertisementId}")
     public ResponseEntity<?> updateAdvertisement(
             @AuthenticationPrincipal String memberEmail,
-            @RequestParam Long advertisementId,
+            @PathVariable Long advertisementId,
             @RequestBody AdvertisementUpdateDto updateDto) {
         try {
             Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberEmail, advertisementId, updateDto);
@@ -102,8 +102,8 @@ public class AdvertisementController {
                 .body(advertisementResponse);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberEmail, @RequestParam Long advertisementId) {
+    @DeleteMapping("/{advertisementId}")
+    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
         try {
             advertisementService.deleteAdvertisement(memberEmail, advertisementId);
             return ResponseEntity.noContent().build();
