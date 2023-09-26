@@ -46,23 +46,27 @@ public class AdvertisementController {
         return ResponseEntity.created(location).build();
     }
 
-    @PatchMapping
-    public ResponseEntity<?> updateAdvertisement(@AuthenticationPrincipal String memberEmail, @RequestBody AdvertisementUpdateDto updateDto) {
+    @GetMapping("/{advertisementId}")
+    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
         try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberEmail, updateDto);
-            return ResponseEntity.ok(updatedAdvertisement);
+            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(memberEmail, advertisementId);
+            return ResponseEntity.ok(advertisementResponseDto);
         } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberId) {
+
+    @PatchMapping("/{advertisementId}")
+    public ResponseEntity<?> updateAdvertisement(
+            @AuthenticationPrincipal String memberEmail,
+            @PathVariable Long advertisementId,
+            @RequestBody AdvertisementUpdateDto updateDto) {
         try {
-            AdvertisementResponseDto getAdvertisement = advertisementService.getAdvertisement(memberId);
-            return ResponseEntity.ok(getAdvertisement);
+            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberEmail, advertisementId, updateDto);
+            return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());// 적절한 응답 상태 및 내용으로 변경
         }
     }
 
@@ -98,13 +102,13 @@ public class AdvertisementController {
                 .body(advertisementResponse);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberId) {
+    @DeleteMapping("/{advertisementId}")
+    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
         try {
-            advertisementService.deleteAdvertisement(memberId);
+            advertisementService.deleteAdvertisement(memberEmail, advertisementId);
             return ResponseEntity.noContent().build();
         } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("광고를 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

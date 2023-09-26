@@ -15,4 +15,6 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
    Optional<Advertisement> findByMemberId(Long memberId);
 
    Page<Advertisement> findByStatusAndMemberId(Advertisement.Status status, Long memberId, Pageable pageable);
+
+   Optional<Advertisement> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId);
 }
