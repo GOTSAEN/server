@@ -64,7 +64,7 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/ad")
+    @GetMapping("/advertisement")
     public ResponseEntity<MultiResponseDto> getAdvertisementsByMember(
             @AuthenticationPrincipal String memberEmail,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -73,5 +73,16 @@ public class MemberController {
         MultiResponseDto advertisements = memberService.findAdvertisementByMember(memberEmail, page, size, status);
 
         return new ResponseEntity<>(advertisements,HttpStatus.OK);
+    }
+
+    @GetMapping("/advertisement/{advertisementId}")
+    public ResponseEntity<MultiResponseDto> getApplicationByAdvertisementsAndMember(
+            @AuthenticationPrincipal String memberEmail,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "1000") int size,
+            @PathVariable Long advertisementId){
+        MultiResponseDto applications = memberService.findApplicationsByAdvertisementAndMember(memberEmail, advertisementId, page, size);
+
+        return new ResponseEntity<>(applications,HttpStatus.OK);
     }
 }
