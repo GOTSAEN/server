@@ -39,9 +39,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
 
         System.out.println("-------------------------------------");
-        System.out.println(oAuth2User.getName());
         System.out.println(oAuth2User.getAttributes());
-
         System.out.println("-------------------------------------");
         Optional<YoutubeMember> findYoutubeMember = youtubeMemberRepository.findByEmail(email);
         List<String> authorities = authorityUtils.createRoles(email);
