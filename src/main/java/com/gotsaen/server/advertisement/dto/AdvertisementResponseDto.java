@@ -1,5 +1,6 @@
 package com.gotsaen.server.advertisement.dto;
 
+import com.gotsaen.server.advertisement.entity.Advertisement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,4 +17,5 @@ public class AdvertisementResponseDto {
     private String offer;
     private String productDescription;
     private String precaution;
+    private Advertisement.Status status;
 }
