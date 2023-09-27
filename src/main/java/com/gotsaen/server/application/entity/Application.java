@@ -23,6 +23,8 @@ public class Application extends Auditable {
     private Long advertisementId;
     @Column
     private Long youtubeMemberId;
+    @Column
+    private String youtubeUrl;
     @Enumerated(EnumType.STRING)
     private Status status = Status.WAITING;
     @Getter

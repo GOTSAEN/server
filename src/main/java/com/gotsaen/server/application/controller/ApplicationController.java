@@ -2,6 +2,7 @@ package com.gotsaen.server.application.controller;
 
 
 import com.gotsaen.server.application.dto.ApplicationDto;
+import com.gotsaen.server.application.dto.ApplicationUpdateDto;
 import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.application.service.ApplicationService;
 import com.gotsaen.server.dto.MultiResponseDto;
@@ -38,6 +39,14 @@ public class ApplicationController {
         MultiResponseDto applications = applicationService.findByStatus(status, page, size);
 
         return new ResponseEntity<>(applications,HttpStatus.OK);
+    }
+
+    @PatchMapping("/{applicationId}")
+    public ResponseEntity updateApplicationStatus(Authentication authentication,
+                                                  @PathVariable Long applicationId,
+                                                  @RequestBody ApplicationUpdateDto updateDto){
+        Application updatedApplication = applicationService.updateApplication(authentication.getPrincipal().toString(), applicationId, updateDto);
+        return new ResponseEntity<>(updatedApplication,HttpStatus.OK);
     }
 
 }

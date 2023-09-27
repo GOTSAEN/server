@@ -3,13 +3,16 @@ package com.gotsaen.server.application.service;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
 import com.gotsaen.server.application.dto.ApplicationDto;
+import com.gotsaen.server.application.dto.ApplicationUpdateDto;
 import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.application.repository.ApplicationRepository;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
+import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.repository.YoutubeMemberRepository;
+import com.gotsaen.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +31,7 @@ public class ApplicationService {
     private final YoutubeMemberRepository youtubeMemberRepository;
     private final AdvertisementRepository advertisementRepository;
     private final ApplicationRepository applicationRepository;
+    private final MemberService memberService;
     @Transactional
     public void createOrDeleteBookmark(ApplicationDto requestBody, String email) {
         YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(email)
@@ -59,5 +64,24 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public int getApplicationCountByAdvertisementId(Long advertisementId) {
         return applicationRepository.countByAdvertisementId(advertisementId);
+    }
+
+    public Application updateApplication(String memberEmail, Long applicationId, ApplicationUpdateDto updateDto) {
+        Application findApplication = findApplicationById(applicationId);
+
+        Optional.ofNullable(updateDto.getStatus())
+                .ifPresent(findApplication::setStatus);
+        Optional.ofNullable(updateDto.getYoutubeUrl())
+                .ifPresent(findApplication::setYoutubeUrl);
+
+        return applicationRepository.save(findApplication);
+    }
+
+    @Transactional(readOnly = true)
+    public Application findApplicationById(Long applicationId) {
+        Optional<Application> optionalApplication =
+                applicationRepository.findById(applicationId);
+        return optionalApplication.orElseThrow(() ->
+                new BusinessLogicException(ExceptionCode.APPLICATION_NOT_FOUND));
     }
 }
