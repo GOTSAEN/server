@@ -20,10 +20,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -139,5 +141,42 @@ public class AdvertisementService {
         } else {
             throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public Advertisement updateAdvertisementStatus(String memberEmail, Long advertisementId) {
+        Member member = memberService.findMemberByEmail(memberEmail);
+        if (member == null) {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
+        if (optionalAdvertisement.isEmpty()) {
+            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
+        }
+
+        Advertisement advertisement = optionalAdvertisement.get();
+        if (advertisement.getStatus() == Advertisement.Status.WAITING) {
+            advertisement.setStatus(Advertisement.Status.PROGRESS);
+            advertisementRepository.save(advertisement);
+            return advertisement;
+        } else {
+            throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
+        }
+    }
+
+
+    @Scheduled(fixedRate = 60000 /*cron = "0 0 * * * *"*/) // 매 정각에 실행
+    public Advertisement updateAdvertisementStatus() {
+        Date currentDate = new Date();
+        List<Advertisement> advertisements = advertisementRepository.findByEndDateLessThan(currentDate);
+
+        for (Advertisement advertisement : advertisements) {
+            if (advertisement.getStatus() == Advertisement.Status.PROGRESS) {
+                advertisement.setStatus(Advertisement.Status.FINISHED);
+                advertisementRepository.save(advertisement);
+            }
+        }
+        return null;
     }
 }
