@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,19 +38,19 @@ public class AdvertisementController {
     }
 
     @PostMapping
-    public ResponseEntity<Advertisement> postAdvertisement(@AuthenticationPrincipal String memberEmail, @Valid @RequestBody AdvertisementDto.Post requestBody) {
+    public ResponseEntity<Advertisement> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
 
-        Advertisement createdAdvertisement = advertisementService.createAdvertisement(memberEmail, advertisement);
+        Advertisement createdAdvertisement = advertisementService.createAdvertisement(authentication.getPrincipal().toString(), advertisement);
         URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
 
         return ResponseEntity.created(location).build();
     }
 
     @GetMapping("/{advertisementId}")
-    public ResponseEntity<?> getAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
+    public ResponseEntity<?> getAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
         try {
-            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(memberEmail, advertisementId);
+            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(authentication.getPrincipal().toString(), advertisementId);
             return ResponseEntity.ok(advertisementResponseDto);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -59,11 +60,11 @@ public class AdvertisementController {
 
     @PatchMapping("/{advertisementId}")
     public ResponseEntity<?> updateAdvertisement(
-            @AuthenticationPrincipal String memberEmail,
+            Authentication authentication,
             @PathVariable Long advertisementId,
             @RequestBody AdvertisementUpdateDto updateDto) {
         try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(memberEmail, advertisementId, updateDto);
+            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(authentication.getPrincipal().toString(), advertisementId, updateDto);
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());// 적절한 응답 상태 및 내용으로 변경
@@ -103,9 +104,9 @@ public class AdvertisementController {
     }
 
     @DeleteMapping("/{advertisementId}")
-    public ResponseEntity<?> deleteAdvertisement(@AuthenticationPrincipal String memberEmail, @PathVariable Long advertisementId) {
+    public ResponseEntity<?> deleteAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
         try {
-            advertisementService.deleteAdvertisement(memberEmail, advertisementId);
+            advertisementService.deleteAdvertisement(authentication.getPrincipal().toString(), advertisementId);
             return ResponseEntity.noContent().build();
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
