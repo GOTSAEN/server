@@ -45,9 +45,9 @@ public class MemberController {
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateMember(@AuthenticationPrincipal String memberEmail, @RequestBody MemberUpdateDto updateDto) {
+    public ResponseEntity<?> updateMember(Authentication authentication, @RequestBody MemberUpdateDto updateDto) {
         try {
-            Member updatedMember = memberService.updateMember(memberEmail, updateDto);
+            Member updatedMember = memberService.updateMember(authentication.getPrincipal().toString(), updateDto);
             return ResponseEntity.ok(updatedMember.getMemberId());
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
@@ -55,9 +55,9 @@ public class MemberController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getMember(@AuthenticationPrincipal String memberEmail) {
+    public ResponseEntity<?> getMember(Authentication authentication) {
         try {
-            MemberResponseDto getMember = memberService.getMember(memberEmail);
+            MemberResponseDto getMember = memberService.getMember(authentication.getPrincipal().toString());
             return ResponseEntity.ok(getMember);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
@@ -66,22 +66,22 @@ public class MemberController {
 
     @GetMapping("/advertisement")
     public ResponseEntity<MultiResponseDto> getAdvertisementsByMember(
-            @AuthenticationPrincipal String memberEmail,
+            Authentication authentication,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "1000") int size,
             @RequestParam Advertisement.Status status){
-        MultiResponseDto advertisements = memberService.findAdvertisementByMember(memberEmail, page, size, status);
+        MultiResponseDto advertisements = memberService.findAdvertisementByMember(authentication.getPrincipal().toString(), page, size, status);
 
         return new ResponseEntity<>(advertisements,HttpStatus.OK);
     }
 
     @GetMapping("/advertisement/{advertisementId}")
     public ResponseEntity<MultiResponseDto> getApplicationByAdvertisementsAndMember(
-            @AuthenticationPrincipal String memberEmail,
+            Authentication authentication,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "1000") int size,
             @PathVariable Long advertisementId){
-        MultiResponseDto applications = memberService.findApplicationsByAdvertisementAndMember(memberEmail, advertisementId, page, size);
+        MultiResponseDto applications = memberService.findApplicationsByAdvertisementAndMember(authentication.getPrincipal().toString(), advertisementId, page, size);
 
         return new ResponseEntity<>(applications,HttpStatus.OK);
     }
