@@ -19,6 +19,5 @@ public class AdvertisementDto {
         private String offer;
         private String productDescription;
         private String precaution;
-        private Long memberId;
     }
 }
