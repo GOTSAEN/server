@@ -11,6 +11,7 @@ import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.dto.PageInfo;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.utils.UriCreator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,15 +28,11 @@ import java.net.URI;
 @RequestMapping("/advertisement")
 @Validated
 @Slf4j
+@RequiredArgsConstructor
 public class AdvertisementController {
     private final static String ADVERTISEMENT_DEFAULT_URL = "/advertisement";
     private final AdvertisementService advertisementService;
     private final AdvertisementMapper advertisementMapper;
-
-    public AdvertisementController(AdvertisementService advertisementService, AdvertisementMapper advertisementMapper) {
-        this.advertisementService = advertisementService;
-        this.advertisementMapper = advertisementMapper;
-    }
 
     @PostMapping
     public ResponseEntity<Advertisement> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {

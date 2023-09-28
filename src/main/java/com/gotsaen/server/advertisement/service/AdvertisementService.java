@@ -16,7 +16,6 @@ import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -31,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,40 +56,25 @@ public class AdvertisementService {
 
     public AdvertisementResponseDto getAdvertisement(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
-        if (member != null) {
-            Advertisement advertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId()).orElse(null);
-            if (advertisement != null) {
-                return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
-            } else {
-                throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
-            }
-        } else {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+        return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
     }
 
     @Transactional
     public Advertisement updateAdvertisement(String memberEmail, Long advertisementId, AdvertisementUpdateDto updateDto) {
         Member member = memberService.findMemberByEmail(memberEmail);
-        if (member != null) {
-            Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
-            if (optionalAdvertisement.isPresent()) {
-                Advertisement advertisement = optionalAdvertisement.get();
-                advertisement.update(
-                        updateDto.getNewNumberOfRecruit(),
-                        updateDto.getNewEndDate(),
-                        updateDto.getNewCategory(),
-                        updateDto.getNewOffer(),
-                        updateDto.getNewProductDescription(),
-                        updateDto.getNewPrecaution()
-                );
-                return advertisementRepository.save(advertisement);
-            } else {
-                throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
-            }
-        } else {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+        Advertisement updatedAdvertisement = advertisementMapper.advertisementUpdateToAdvertisement(updateDto);
+
+        updateAdvertisementIfPresent(updatedAdvertisement.getProductName(), advertisement::setProductName);
+        updateAdvertisementIfPresent(updatedAdvertisement.getNumberOfRecruit(), advertisement::setNumberOfRecruit);
+        updateAdvertisementIfPresent(updatedAdvertisement.getEndDate(), advertisement::setEndDate);
+        updateAdvertisementIfPresent(updatedAdvertisement.getCategory(), advertisement::setCategory);
+        updateAdvertisementIfPresent(updatedAdvertisement.getOffer(), advertisement::setOffer);
+        updateAdvertisementIfPresent(updatedAdvertisement.getProductDescription(), advertisement::setProductDescription);
+        updateAdvertisementIfPresent(updatedAdvertisement.getPrecaution(), advertisement::setPrecaution);
+
+        return advertisementRepository.save(advertisement);
     }
 
     @Transactional(readOnly = true)
@@ -124,40 +109,15 @@ public class AdvertisementService {
     @Transactional
     public void deleteAdvertisement(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
-        if (member != null) {
-            Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
-            if (optionalAdvertisement.isPresent()) {
-                Advertisement advertisement = optionalAdvertisement.get();
-                advertisementRepository.delete(advertisement);
-            } else {
-                throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
-            }
-        } else {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
-    }
-
-    public int getAdvertisementApplicationCount(Long advertisementId) {
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
-
-        if (optionalAdvertisement.isPresent()) {
-            Advertisement advertisement = optionalAdvertisement.get();
-            return applicationService.getApplicationCountByAdvertisementId(advertisement.getAdvertisementId());
-        } else {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+        advertisementRepository.delete(advertisement);
     }
 
     @Transactional
     public Advertisement updateAdvertisementStatus(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
 
-        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
-        if (optionalAdvertisement.isEmpty()) {
-            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
-        }
-
-        Advertisement advertisement = optionalAdvertisement.get();
         if (advertisement.getStatus() == Advertisement.Status.WAITING) {
             advertisement.setStatus(Advertisement.Status.PROGRESS);
             advertisementRepository.save(advertisement);
@@ -180,6 +140,32 @@ public class AdvertisementService {
                 advertisementRepository.save(advertisement);
 //              log.info("Advertisement ID {}의 상태를 FINISHED로 변경했습니다.", advertisement.getAdvertisementId());
             }
+        }
+    }
+
+    public int getAdvertisementApplicationCount(Long advertisementId) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+
+        if (optionalAdvertisement.isPresent()) {
+            Advertisement advertisement = optionalAdvertisement.get();
+            return applicationService.getApplicationCountByAdvertisementId(advertisement.getAdvertisementId());
+        } else {
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+    }
+
+    private Advertisement getAdvertisementByIdAndMemberId(Long advertisementId, Member member) {
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
+        if (optionalAdvertisement.isPresent()) {
+            return optionalAdvertisement.get();
+        } else {
+            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
+        }
+    }
+
+    private <T> void updateAdvertisementIfPresent(T newValue, Consumer<T> setter) {
+        if (newValue != null) {
+            setter.accept(newValue);
         }
     }
 }
