@@ -113,7 +113,7 @@ public class AdvertisementController {
         }
     }
 
-    @PatchMapping("/{advertisementId}/complete-recruitment")
+    @PatchMapping("/{advertisementId}/completeRecruitment")
     public ResponseEntity<?> completeRecruitment(Authentication authentication, @PathVariable Long advertisementId) {
         try {
             Advertisement updatedAdvertisement = advertisementService.updateAdvertisementStatus(authentication.getPrincipal().toString(), advertisementId);
@@ -122,10 +122,4 @@ public class AdvertisementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-
-//    @GetMapping("/update")
-//    public ResponseEntity<?> updateStatus() {
-//        Advertisement updatedAdvertisement = advertisementService.updateAdvertisementStatus();
-//        return ResponseEntity.ok(updatedAdvertisement);
-//    }
 }
