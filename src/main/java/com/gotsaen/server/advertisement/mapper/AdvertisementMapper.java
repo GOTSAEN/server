@@ -3,6 +3,7 @@ package com.gotsaen.server.advertisement.mapper;
 import com.gotsaen.server.advertisement.dto.AdvertisementDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementResponseDto;
 import com.gotsaen.server.advertisement.dto.AdvertisementSummaryDto;
+import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.dto.PageInfo;
 import org.mapstruct.Mapper;
@@ -16,4 +17,5 @@ public interface AdvertisementMapper {
     Advertisement advertisementPostToAdvertisement(AdvertisementDto.Post requestBody);
     AdvertisementResponseDto advertisementToAdvertisementResponse(Advertisement advertisement);
     AdvertisementSummaryDto advertisementToAdvertisementSummaryDto(Advertisement advertisement);
+    Advertisement advertisementUpdateToAdvertisement(AdvertisementUpdateDto requestBody);
 }
