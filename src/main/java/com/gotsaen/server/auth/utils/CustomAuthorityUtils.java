@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,9 +38,13 @@ public class CustomAuthorityUtils {
 
     // DB 저장 용
     public List<String> createRoles(String email) {
+        List<String> roles = new ArrayList<>();
         if (email.equals(adminMailAddress)) {
-            return ADMIN_ROLES_STRING;
+            roles.addAll(ADMIN_ROLES_STRING);
+        } else {
+            roles.addAll(USER_ROLES_STRING);
         }
-        return USER_ROLES_STRING;
+
+        return roles;
     }
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -31,13 +32,15 @@ public class YoutubeMember extends Auditable {
 
     @Column(length = 500, nullable = true)
     private String channelId;
-
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
     @Builder
-    public YoutubeMember(Long youtubeMemberId, String email, String nickname, String avatarUri, String channelId) {
+    public YoutubeMember(Long youtubeMemberId, String email, String nickname, String avatarUri, String channelId, List<String> roles) {
         this.youtubeMemberId = youtubeMemberId;
         this.email = email;
         this.nickname = nickname;
         this.avatarUri = avatarUri;
         this.channelId = channelId;
+        this.roles = roles;
     }
 }

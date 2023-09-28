@@ -43,13 +43,15 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         System.out.println("-------------------------------------");
         Optional<YoutubeMember> findYoutubeMember = youtubeMemberRepository.findByEmail(email);
         List<String> authorities = authorityUtils.createRoles(email);
+        authorities.add("YOUTUBER");
         String nickname = oAuth2User.getAttribute("name");
         String avatarUri = oAuth2User.getAttribute("picture");
         if (findYoutubeMember.isEmpty()) { //찾지 못했다면
             YoutubeMember youtubeMember = YoutubeMember.builder()
                     .nickname(nickname)
                     .email(email)
-                    .avatarUri(avatarUri).build();
+                    .avatarUri(avatarUri)
+                    .roles(authorities).build();
             youtubeMemberRepository.save(youtubeMember);
         }
         return oAuth2User;
