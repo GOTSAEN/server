@@ -16,6 +16,9 @@ import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +42,8 @@ public class AdvertisementService {
 
     private final MemberService memberService;
     private final ApplicationService applicationService;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -146,9 +151,6 @@ public class AdvertisementService {
     @Transactional
     public Advertisement updateAdvertisementStatus(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
-        if (member == null) {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
-        }
 
         Optional<Advertisement> optionalAdvertisement = advertisementRepository.findByAdvertisementIdAndMemberId(advertisementId, member.getMemberId());
         if (optionalAdvertisement.isEmpty()) {
@@ -166,17 +168,18 @@ public class AdvertisementService {
     }
 
 
-    @Scheduled(fixedRate = 60000 /*cron = "0 0 * * * *"*/) // 매 정각에 실행
-    public Advertisement updateAdvertisementStatus() {
+    @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
+    public void updateAdvertisementStatus() {
         Date currentDate = new Date();
         List<Advertisement> advertisements = advertisementRepository.findByEndDateLessThan(currentDate);
+//      log.info("updateAdvertisementStatus() 메서드가 호출되었습니다.");
 
         for (Advertisement advertisement : advertisements) {
             if (advertisement.getStatus() == Advertisement.Status.PROGRESS) {
                 advertisement.setStatus(Advertisement.Status.FINISHED);
                 advertisementRepository.save(advertisement);
+//              log.info("Advertisement ID {}의 상태를 FINISHED로 변경했습니다.", advertisement.getAdvertisementId());
             }
         }
-        return null;
     }
 }
