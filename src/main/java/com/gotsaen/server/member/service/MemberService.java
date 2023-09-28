@@ -22,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,6 +59,7 @@ public class MemberService {
 
         // 추가: DB에 User Role 저장
         List<String> roles = authorityUtils.createRoles(member.getEmail());
+        roles.add("ADVERTISER");
         member.setRoles(roles);
 
         Member savedMember = memberRepository.save(member);
@@ -124,4 +128,15 @@ public class MemberService {
     }
 
 
+    public void checkAdvertiser(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                System.out.println("---------------------");
+                System.out.println(authority.getAuthority());
+                if ("ROLE_YOUTUBER".equals(authority.getAuthority())) {
+                    throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISER_AUTHORIZATION);
+                }
+            }
+        }
+    }
 }

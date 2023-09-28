@@ -42,7 +42,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                         new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
         Long id = findYoutubeMember.getYoutubeMemberId();
         List<String> authorities = authorityUtils.createRoles(email);
-
+        authorities.add("YOUTUBER");
         redirect(request, response, email, id, authorities);
     }
 

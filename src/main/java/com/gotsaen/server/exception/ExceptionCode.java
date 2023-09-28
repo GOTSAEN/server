@@ -23,9 +23,10 @@ public enum ExceptionCode {
     RECOMMEND_NOT_FOUND(404, "추천을 찾을 수 없습니다"),
     ADVERTISEMENT_NOT_FOUND(404, "광고를 찾을 수 없습니다"),
     CATEGORY_NOT_FOUND(404, "카테고리를 찾을 수 없습니다"),
-    INVALID_AUTHORIZATION(401, "권한이 없습니다"),
+    INVALID_ADVERTISER_AUTHORIZATION(401, "광고주 권한이 없습니다"),
     CATEGORY_EXISTS(409, "이미 존재하는 카테고리입니다"),
     APPLICATION_NOT_FOUND(404, "광고 신청를 찾을 수 없습니다"),
+
     REPORT_NOT_FOUND(404, "제보를 찾을 수 없습니다");
 
     @Getter

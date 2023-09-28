@@ -35,7 +35,7 @@ public class MemberController {
     private final MemberMapper memberMapper;
 
     @PostMapping
-    public ResponseEntity<Member> postMember(@Valid @RequestBody MemberDto requestBody){
+    public ResponseEntity<Member> postMember(@Valid @RequestBody MemberDto requestBody) {
         Member member = memberMapper.memberPostToMember(requestBody);
 
         Member createdMember = memberService.createMember(member);
@@ -46,22 +46,20 @@ public class MemberController {
 
     @PatchMapping
     public ResponseEntity<?> updateMember(Authentication authentication, @RequestBody MemberUpdateDto updateDto) {
-        try {
-            Member updatedMember = memberService.updateMember(authentication.getPrincipal().toString(), updateDto);
-            return ResponseEntity.ok(updatedMember.getMemberId());
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
-        }
+        memberService.checkAdvertiser(authentication);
+
+        Member updatedMember = memberService.updateMember(authentication.getPrincipal().toString(), updateDto);
+        return ResponseEntity.ok(updatedMember);
+
     }
 
     @GetMapping
     public ResponseEntity<?> getMember(Authentication authentication) {
-        try {
-            MemberResponseDto getMember = memberService.getMember(authentication.getPrincipal().toString());
-            return ResponseEntity.ok(getMember);
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found"); // 또는 적절한 응답을 반환
-        }
+        memberService.checkAdvertiser(authentication);
+
+        MemberResponseDto getMember = memberService.getMember(authentication.getPrincipal().toString());
+        return ResponseEntity.ok(getMember);
+
     }
 
     @GetMapping("/advertisement")
@@ -69,10 +67,11 @@ public class MemberController {
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "1000") int size,
-            @RequestParam Advertisement.Status status){
+            @RequestParam Advertisement.Status status) {
+        memberService.checkAdvertiser(authentication);
         MultiResponseDto advertisements = memberService.findAdvertisementByMember(authentication.getPrincipal().toString(), page, size, status);
 
-        return new ResponseEntity<>(advertisements,HttpStatus.OK);
+        return new ResponseEntity<>(advertisements, HttpStatus.OK);
     }
 
     @GetMapping("/advertisement/{advertisementId}")
@@ -80,9 +79,10 @@ public class MemberController {
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "1000") int size,
-            @PathVariable Long advertisementId){
+            @PathVariable Long advertisementId) {
+        memberService.checkAdvertiser(authentication);
         MultiResponseDto applications = memberService.findApplicationsByAdvertisementAndMember(authentication.getPrincipal().toString(), advertisementId, page, size);
 
-        return new ResponseEntity<>(applications,HttpStatus.OK);
+        return new ResponseEntity<>(applications, HttpStatus.OK);
     }
 }
