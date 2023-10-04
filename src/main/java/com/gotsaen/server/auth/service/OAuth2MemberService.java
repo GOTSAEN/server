@@ -2,11 +2,15 @@ package com.gotsaen.server.auth.service;
 
 
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
+import com.gotsaen.server.exception.BusinessLogicException;
+import com.gotsaen.server.exception.ExceptionCode;
 import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.repository.MemberRepository;
 import com.gotsaen.server.member.repository.YoutubeMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -57,4 +61,15 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
+    public void checkYoutuber(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                System.out.println("---------------------");
+                System.out.println(authority.getAuthority());
+                if ("ROLE_ADVERTISER".equals(authority.getAuthority())) {
+                    throw new BusinessLogicException(ExceptionCode.INVALID_YOUTUBER_AUTHORIZATION);
+                }
+            }
+        }
+    }
 }

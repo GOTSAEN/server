@@ -5,6 +5,7 @@ import com.gotsaen.server.application.dto.ApplicationDto;
 import com.gotsaen.server.application.dto.ApplicationUpdateDto;
 import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.application.service.ApplicationService;
+import com.gotsaen.server.auth.service.OAuth2MemberService;
 import com.gotsaen.server.dto.MultiResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +24,12 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class ApplicationController {
     private final ApplicationService applicationService;
+    private final OAuth2MemberService oAuth2MemberService;
 
     @PostMapping
     public ResponseEntity postApplication(@Valid @RequestBody ApplicationDto requestBody, Authentication authentication){
-        String email = authentication.getPrincipal().toString();
-        applicationService.createOrDeleteBookmark(requestBody, email);
+        oAuth2MemberService.checkYoutuber(authentication);
+        applicationService.createOrDeleteApplication(requestBody, authentication.getPrincipal().toString());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

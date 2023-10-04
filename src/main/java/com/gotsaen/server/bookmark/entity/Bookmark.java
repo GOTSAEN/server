@@ -1,4 +1,4 @@
-package com.gotsaen.server.application.entity;
+package com.gotsaen.server.bookmark.entity;
 
 import com.gotsaen.server.audit.Auditable;
 import lombok.AllArgsConstructor;
@@ -13,22 +13,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Application extends Auditable {
+public class Bookmark extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long applicationId;
+    private Long bookmarkId;
     @Column
     private Long memberId;
     @Column
     private Long advertisementId;
     @Column
     private Long youtubeMemberId;
-    @Column
-    private String youtubeUrl;
-    @Enumerated(EnumType.STRING)
-    private Status status = Status.WAITING;
-    @Getter
-    public enum Status {
-        WAITING, PROGRESS, REJECTION, FINISHED;
-    }
 }
