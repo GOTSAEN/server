@@ -5,6 +5,7 @@ import lombok.Getter;
 public enum ExceptionCode {
     MEMBER_NOT_FOUND(404, "회원을 찾을 수 없습니다"),
     MEMBER_EXISTS(409, "이미 존재하는 회원입니다"),
+    YOUTUBER_NOT_FOUND(404, "유튜버를 찾을 수 없습니다"),
     INVALID_EMAIL(400, "유효하지 않은 이메일 형식입니다"),
     INVALID_NICKNAME(400, "닉네임이 유효하지 않습니다"),
     EMAIL_DUPLICATION(400, "이메일이 중복입니다"),
@@ -24,6 +25,7 @@ public enum ExceptionCode {
     ADVERTISEMENT_NOT_FOUND(404, "광고를 찾을 수 없습니다"),
     CATEGORY_NOT_FOUND(404, "카테고리를 찾을 수 없습니다"),
     INVALID_ADVERTISER_AUTHORIZATION(401, "광고주 권한이 없습니다"),
+    INVALID_YOUTUBER_AUTHORIZATION(401, "유튜버 권한이 없습니다"),
     CATEGORY_EXISTS(409, "이미 존재하는 카테고리입니다"),
     APPLICATION_NOT_FOUND(404, "광고 신청를 찾을 수 없습니다"),
 
