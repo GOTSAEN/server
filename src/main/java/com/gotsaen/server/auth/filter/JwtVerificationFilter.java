@@ -5,6 +5,7 @@ import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,7 +48,25 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
                     String newAccessToken = jwtTokenizer.generateAccessToken(jwtClaims, username, newExpiration, base64EncodedSecretKey);
 
                     String newRefreshToken = jwtTokenizer.delegateRefreshToken(username);
-                    response.setHeader("Authorization", "Bearer " + newAccessToken);
+                    ResponseCookie accessTokenCookie = ResponseCookie.from("Authorization", "Bearer" + newAccessToken)
+                            .maxAge(60 * 60)
+                            .path("/")
+                            .secure(true)
+                            .sameSite("None")
+                            .httpOnly(true)
+                            .build();
+
+                    ResponseCookie refreshTokenCookie = ResponseCookie.from("Refresh", newRefreshToken)
+                            .maxAge(7 * 24 * 60 * 60)
+                            .path("/")
+                            .secure(true)
+                            .sameSite("None")
+                            .httpOnly(true)
+                            .build();
+
+                    response.addHeader("Set-Cookie", accessTokenCookie.toString());
+                    response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+                    response.setHeader("Authorization", "Bearer" + newAccessToken);
                     response.setHeader("Refresh", newRefreshToken);
                     if(request.getHeader("userType").equals("advertisement")){
                         response.setHeader("userType", "advertisement");
@@ -81,7 +100,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     }
 
     private Map<String, Object> verifyJws(HttpServletRequest request) {
-        String jws = request.getHeader("Authorization").replace("Bearer ", "");
+        String jws = request.getHeader("Authorization").replace("Bearer", "");
         String base64EncodedSecretKey = jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey());
         Map<String, Object> claims = jwtTokenizer.getClaims(jws, base64EncodedSecretKey).getBody();
 
