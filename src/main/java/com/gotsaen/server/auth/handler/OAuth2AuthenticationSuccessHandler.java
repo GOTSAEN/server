@@ -8,6 +8,7 @@ import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.repository.YoutubeMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -49,6 +50,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private void redirect(HttpServletRequest request, HttpServletResponse response, String username, Long userid, List<String> authorities) throws IOException {
         String accessToken = delegateAccessToken(username, userid, authorities);
         String refreshToken = delegateRefreshToken(username);
+        ResponseCookie accessTokenCookie = ResponseCookie.from("Authorization", "Bearer" + accessToken)
+                .maxAge(60 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .httpOnly(true)
+                .build();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("Refresh", refreshToken)
+                .maxAge(7 * 24 * 60 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .httpOnly(true)
+                .build();
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
         response.setHeader("UserType", "youtuber");

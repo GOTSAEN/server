@@ -5,6 +5,7 @@ import com.gotsaen.server.auth.dto.LoginDto;
 import com.gotsaen.server.auth.jwt.JwtTokenizer;
 import com.gotsaen.server.member.entity.Member;
 import lombok.SneakyThrows;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,8 +48,26 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = delegateAccessToken(member);
         String refreshToken = jwtTokenizer.delegateRefreshToken(member.getEmail());
+        ResponseCookie accessTokenCookie = ResponseCookie.from("Authorization", "Bearer" + accessToken)
+                .maxAge(60 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .httpOnly(true)
+                .build();
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("Refresh", refreshToken)
+                .maxAge(7 * 24 * 60 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .httpOnly(true)
+                .build();
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+        response.setHeader("Authorization", "Bearer" + accessToken);
         response.setHeader("Refresh", refreshToken);
         response.setHeader("UserType", "advertisement");
 
