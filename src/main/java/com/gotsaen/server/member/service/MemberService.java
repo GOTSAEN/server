@@ -139,4 +139,10 @@ public class MemberService {
             }
         }
     }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteMember(String memberEmail) {
+        Member findMember = findMemberByEmail(memberEmail);
+
+        memberRepository.delete(findMember);
+    }
 }
