@@ -7,21 +7,27 @@ import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.service.AdvertisementService;
+import com.gotsaen.server.advertisement.service.AwsS3UploadService;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.dto.PageInfo;
 import com.gotsaen.server.exception.BusinessLogicException;
+import com.gotsaen.server.member.entity.Member;
+import com.gotsaen.server.member.service.MemberService;
 import com.gotsaen.server.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 
 @RestController
@@ -31,8 +37,10 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class AdvertisementController {
     private final static String ADVERTISEMENT_DEFAULT_URL = "/advertisement";
+    private final MemberService memberService;
     private final AdvertisementService advertisementService;
     private final AdvertisementMapper advertisementMapper;
+    private final AwsS3UploadService awsS3UploadService;
 
     @PostMapping
     public ResponseEntity<Advertisement> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
@@ -44,6 +52,17 @@ public class AdvertisementController {
         return ResponseEntity.created(location).build();
     }
 
+    @PostMapping(value="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            // 이미지를 업로드하고 이미지 URL을 받아옴.
+            String imageUrl = awsS3UploadService.uploadImage(file);
+            return ResponseEntity.ok(imageUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image.");
+        }
+    }
+
     @GetMapping("/{advertisementId}")
     public ResponseEntity<?> getAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
         try {
@@ -53,7 +72,6 @@ public class AdvertisementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-
 
     @PatchMapping("/{advertisementId}")
     public ResponseEntity<?> updateAdvertisement(
