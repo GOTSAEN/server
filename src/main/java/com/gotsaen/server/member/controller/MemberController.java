@@ -85,4 +85,14 @@ public class MemberController {
 
         return new ResponseEntity<>(applications, HttpStatus.OK);
     }
+
+    @DeleteMapping
+    public ResponseEntity deleteMember(
+            Authentication authentication) {
+        memberService.checkAdvertiser(authentication);
+
+        memberService.deleteMember(authentication.getPrincipal().toString());
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
