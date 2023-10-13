@@ -7,6 +7,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 public class AdvertisementSummaryDto {
+    private Long advertisementId;
     private String productName;
     private Long numberOfRecruit;
     private String category;

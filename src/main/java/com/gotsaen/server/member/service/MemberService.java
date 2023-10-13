@@ -1,7 +1,10 @@
 package com.gotsaen.server.member.service;
 
 
+import com.gotsaen.server.advertisement.dto.AdvertisementByStatusDto;
+import com.gotsaen.server.advertisement.dto.AdvertisementSummaryDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
+import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
 import com.gotsaen.server.application.entity.Application;
 import com.gotsaen.server.application.repository.ApplicationRepository;
@@ -47,6 +50,7 @@ public class MemberService {
     private final CustomAuthorityUtils authorityUtils;
     private final AdvertisementRepository advertisementRepository;
     private final ApplicationRepository applicationRepository;
+    private final AdvertisementMapper advertisementMapper;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Member createMember(Member member) {
@@ -110,8 +114,20 @@ public class MemberService {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Advertisement> advertisementsPage = advertisementRepository.findByStatusAndMemberId(status, findMember.getMemberId(), pageable);
 
-        List<Advertisement> advertisements = new ArrayList<>();
+        List<AdvertisementByStatusDto> advertisements = new ArrayList<>();
         advertisements = advertisementsPage.getContent().stream()
+                .map(advertisement -> {
+                    int numberOfApplicants = 0;
+                    if(status == Advertisement.Status.WAITING){
+                        numberOfApplicants = applicationRepository.countByAdvertisementId(advertisement.getAdvertisementId());
+                    }
+                    else if(status == Advertisement.Status.PROGRESS){
+                        numberOfApplicants = applicationRepository.countByAdvertisementIdAndStatus(advertisement.getAdvertisementId(), Application.Status.FINISHED);
+                    }
+                    AdvertisementByStatusDto summaryDto = advertisementMapper.advertisementToAdvertisementByStatusDto(advertisement);
+                    summaryDto.setNumberOfApplicants(numberOfApplicants);
+                    return summaryDto;
+                })
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(advertisements, advertisementsPage);

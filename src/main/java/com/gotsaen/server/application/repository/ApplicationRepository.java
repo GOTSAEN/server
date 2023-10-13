@@ -11,4 +11,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     int countByAdvertisementId(Long advertisementId);
 
     Page<Application> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId, Pageable pageable);
+
+    int countByAdvertisementIdAndStatus(Long advertisementId, Application.Status status);
 }
