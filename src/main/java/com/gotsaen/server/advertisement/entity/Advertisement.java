@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -46,7 +47,8 @@ public class Advertisement extends Auditable {
     private Long memberId;
 
     @Column
-    private String imageUrl;
+    @ElementCollection
+    private List<String> imageUrlList;
 
     @Enumerated(EnumType.STRING)
     private Advertisement.Status status = Advertisement.Status.WAITING;
