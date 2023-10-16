@@ -29,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/advertisement")
@@ -37,7 +39,6 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class AdvertisementController {
     private final static String ADVERTISEMENT_DEFAULT_URL = "/advertisement";
-    private final MemberService memberService;
     private final AdvertisementService advertisementService;
     private final AdvertisementMapper advertisementMapper;
     private final AwsS3UploadService awsS3UploadService;
@@ -53,16 +54,18 @@ public class AdvertisementController {
     }
 
     @PostMapping(value="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<List<String>> uploadMultipleImages(@RequestParam("file") List<MultipartFile> files) {
         try {
-            // 이미지를 업로드하고 이미지 URL을 받아옴.
-            String imageUrl = awsS3UploadService.uploadImage(file);
-            return ResponseEntity.ok(imageUrl);
+            // 다중 이미지를 업로드하고 이미지 URL 목록을 받아옴.
+            List<String> imageUrls = awsS3UploadService.uploadImages(files);
+//            for (String imageUrl : imageUrls) {
+//                advertisementService.saveImageUrl(advertisementId, imageUrl);
+//            }
+            return ResponseEntity.ok(imageUrls);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
-
     @GetMapping("/{advertisementId}")
     public ResponseEntity<?> getAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
         try {

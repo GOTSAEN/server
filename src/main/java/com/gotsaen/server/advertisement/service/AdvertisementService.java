@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,6 +127,26 @@ public class AdvertisementService {
             throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
         }
     }
+
+//    @Transactional
+//    public Advertisement saveImageUrl(Long advertisementId, String imageUrl) {
+//        Optional<Advertisement> advertisementOptional = advertisementRepository.findById(advertisementId);
+//
+//        if (advertisementOptional.isPresent()) {
+//            Advertisement advertisement = advertisementOptional.get();
+//
+//            List<String> imageUrlList = advertisement.getImageUrlList();
+//            imageUrlList.add(imageUrl);
+//            advertisement.setImageUrlList(imageUrlList);
+//            advertisementRepository.save(advertisement);
+//
+//            return advertisement;
+//        } else {
+//            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
+//        }
+//    }
+
+
 
 
     @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
