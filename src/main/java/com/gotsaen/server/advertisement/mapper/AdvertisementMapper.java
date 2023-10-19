@@ -2,12 +2,10 @@ package com.gotsaen.server.advertisement.mapper;
 
 import com.gotsaen.server.advertisement.dto.*;
 import com.gotsaen.server.advertisement.entity.Advertisement;
-import com.gotsaen.server.dto.PageInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AdvertisementMapper {
