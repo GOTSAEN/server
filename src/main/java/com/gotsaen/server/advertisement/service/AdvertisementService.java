@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -55,11 +54,17 @@ public class AdvertisementService {
         return savedAdvertisement;
     }
 
-    public AdvertisementResponseDto getAdvertisement(String memberEmail, Long advertisementId) {
-        Member member = memberService.findMemberByEmail(memberEmail);
-        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
-        return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
+    public AdvertisementResponseDto getAdvertisement(Long advertisementId) {
+        Optional<Advertisement> advertisementOptional = advertisementRepository.findById(advertisementId);
+
+        if (advertisementOptional.isPresent()) {
+            Advertisement advertisement = advertisementOptional.get();
+            return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
+        } else {
+            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
+        }
     }
+
 
     @Transactional
     public Advertisement updateAdvertisement(String memberEmail, Long advertisementId, AdvertisementUpdateDto updateDto) {
@@ -128,27 +133,23 @@ public class AdvertisementService {
         }
     }
 
-//    @Transactional
-//    public Advertisement saveImageUrl(Long advertisementId, String imageUrl) {
-//        Optional<Advertisement> advertisementOptional = advertisementRepository.findById(advertisementId);
-//
-//        if (advertisementOptional.isPresent()) {
-//            Advertisement advertisement = advertisementOptional.get();
-//
-//            List<String> imageUrlList = advertisement.getImageUrlList();
-//            imageUrlList.add(imageUrl);
-//            advertisement.setImageUrlList(imageUrlList);
-//            advertisementRepository.save(advertisement);
-//
-//            return advertisement;
-//        } else {
-//            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
-//        }
-//    }
+    @Transactional
+    public void saveImageUrl(Long advertisementId, String imageUrl) {
+        Optional<Advertisement> advertisementOptional = advertisementRepository.findById(advertisementId);
 
+        if (advertisementOptional.isPresent()) {
+            Advertisement advertisement = advertisementOptional.get();
 
+            List<String> imageUrlList = advertisement.getImageUrlList();
+            imageUrlList.add(imageUrl);
+            advertisement.setImageUrlList(imageUrlList);
+            advertisementRepository.save(advertisement);
 
-
+        } else {
+            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
+        }
+    }
+    
     @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
     public void updateAdvertisementStatus() {
         Date currentDate = new Date();

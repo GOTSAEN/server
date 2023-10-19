@@ -53,23 +53,23 @@ public class AdvertisementController {
         return ResponseEntity.created(location).build();
     }
 
-    @PostMapping(value="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String>> uploadMultipleImages(@RequestParam("file") List<MultipartFile> files) {
+    @PostMapping(value="/upload/{advertisementId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<String>> uploadMultipleImages(@RequestParam("file") List<MultipartFile> files, @PathVariable Long advertisementId) {
         try {
             // 다중 이미지를 업로드하고 이미지 URL 목록을 받아옴.
             List<String> imageUrls = awsS3UploadService.uploadImages(files);
-//            for (String imageUrl : imageUrls) {
-//                advertisementService.saveImageUrl(advertisementId, imageUrl);
-//            }
+            for (String imageUrl : imageUrls) {
+                advertisementService.saveImageUrl(advertisementId, imageUrl);
+            }
             return ResponseEntity.ok(imageUrls);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
     @GetMapping("/{advertisementId}")
-    public ResponseEntity<?> getAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
+    public ResponseEntity<?> getAdvertisement(@PathVariable Long advertisementId) {
         try {
-            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(authentication.getPrincipal().toString(), advertisementId);
+            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(advertisementId);
             return ResponseEntity.ok(advertisementResponseDto);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
