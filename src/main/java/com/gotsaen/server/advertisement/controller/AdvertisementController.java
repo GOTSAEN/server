@@ -131,10 +131,10 @@ public class AdvertisementController {
         }
     }
 
-    @PatchMapping("/{advertisementId}/completeRecruitment")
+    @PatchMapping("/{advertisementId}/finishAd")
     public ResponseEntity<?> completeRecruitment(Authentication authentication, @PathVariable Long advertisementId) {
         try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisementStatus(authentication.getPrincipal().toString(), advertisementId);
+            Advertisement updatedAdvertisement = advertisementService.progressToFinished(authentication.getPrincipal().toString(), advertisementId);
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

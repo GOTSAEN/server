@@ -16,8 +16,6 @@ import com.gotsaen.server.member.entity.Member;
 import com.gotsaen.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,8 +40,6 @@ public class AdvertisementService {
 
     private final MemberService memberService;
     private final ApplicationService applicationService;
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -119,19 +115,6 @@ public class AdvertisementService {
         advertisementRepository.delete(advertisement);
     }
 
-    @Transactional
-    public Advertisement updateAdvertisementStatus(String memberEmail, Long advertisementId) {
-        Member member = memberService.findMemberByEmail(memberEmail);
-        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
-
-        if (advertisement.getStatus() == Advertisement.Status.WAITING) {
-            advertisement.setStatus(Advertisement.Status.PROGRESS);
-            advertisementRepository.save(advertisement);
-            return advertisement;
-        } else {
-            throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
-        }
-    }
 
     @Transactional
     public void saveImageUrl(Long advertisementId, String imageUrl) {
@@ -151,17 +134,29 @@ public class AdvertisementService {
     }
     
     @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
-    public void updateAdvertisementStatus() {
+    public void waitingToProgress() {
         Date currentDate = new Date();
         List<Advertisement> advertisements = advertisementRepository.findByEndDateLessThan(currentDate);
-//      log.info("updateAdvertisementStatus() 메서드가 호출되었습니다.");
 
         for (Advertisement advertisement : advertisements) {
-            if (advertisement.getStatus() == Advertisement.Status.PROGRESS) {
-                advertisement.setStatus(Advertisement.Status.FINISHED);
+            if (advertisement.getStatus() == Advertisement.Status.WAITING) {
+                advertisement.setStatus(Advertisement.Status.PROGRESS);
                 advertisementRepository.save(advertisement);
-//              log.info("Advertisement ID {}의 상태를 FINISHED로 변경했습니다.", advertisement.getAdvertisementId());
             }
+        }
+    }
+
+    @Transactional
+    public Advertisement progressToFinished(String memberEmail, Long advertisementId) {
+        Member member = memberService.findMemberByEmail(memberEmail);
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+
+        if (advertisement.getStatus() == Advertisement.Status.PROGRESS) {
+            advertisement.setStatus(Advertisement.Status.FINISHED);
+            advertisementRepository.save(advertisement);
+            return advertisement;
+        } else {
+            throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
         }
     }
 
