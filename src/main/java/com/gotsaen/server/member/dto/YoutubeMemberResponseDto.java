@@ -14,4 +14,5 @@ public class YoutubeMemberResponseDto {
     private String nickname;
     private String avatarUri;
     private String channelId;
+    private String category;
 }

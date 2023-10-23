@@ -32,15 +32,19 @@ public class YoutubeMember extends Auditable {
 
     @Column(length = 500, nullable = true)
     private String channelId;
+
+    @Column(length = 500, nullable = true)
+    private String category;
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
     @Builder
-    public YoutubeMember(Long youtubeMemberId, String email, String nickname, String avatarUri, String channelId, List<String> roles) {
+    public YoutubeMember(Long youtubeMemberId, String email, String nickname, String avatarUri, String channelId, String category, List<String> roles) {
         this.youtubeMemberId = youtubeMemberId;
         this.email = email;
         this.nickname = nickname;
         this.avatarUri = avatarUri;
         this.channelId = channelId;
+        this.category = category;
         this.roles = roles;
     }
 }
