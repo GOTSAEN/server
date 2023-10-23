@@ -103,24 +103,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private URI createURI() {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-//        return UriComponentsBuilder
-//                .newInstance()
-//                .scheme("https")
-//                .host("youad.store")
-//                .port("3000")
-//                .path("/client")
-//                .queryParams(queryParams)
-//                .build()
-//                .toUri();
-
-        //로컬용
         return UriComponentsBuilder
                 .newInstance()
-                .scheme("http")
-                .host("localhost")
-                .path("/receive-token.html")
+                .scheme("https")
+                .host("youad.store")
+                .port("3000")
+                .path("/client")
                 .queryParams(queryParams)
                 .build()
                 .toUri();
+
+//        //로컬용
+//        return UriComponentsBuilder
+//                .newInstance()
+//                .scheme("http")
+//                .host("localhost")
+//                .path("/receive-token.html")
+//                .queryParams(queryParams)
+//                .build()
+//                .toUri();
     }
 }
