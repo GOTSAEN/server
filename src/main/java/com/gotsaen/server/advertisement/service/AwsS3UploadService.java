@@ -4,8 +4,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.gotsaen.server.advertisement.entity.Advertisement;
-import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +23,6 @@ public class AwsS3UploadService {
     private static final String S3_BUCKET_DIRECTORY_NAME = "images";
 
     private final AmazonS3Client amazonS3Client;
-    private final AdvertisementRepository advertisementRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -35,7 +32,6 @@ public class AwsS3UploadService {
         List<String> imageUrls = new ArrayList<>();
 
         for (MultipartFile file : multipartFiles) {
-            // 메타데이터 설정
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(file.getContentType());
             objectMetadata.setContentLength(file.getSize());

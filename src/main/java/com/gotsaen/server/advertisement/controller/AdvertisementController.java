@@ -85,7 +85,7 @@ public class AdvertisementController {
             Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(authentication.getPrincipal().toString(), advertisementId, updateDto);
             return ResponseEntity.ok(updatedAdvertisement);
         } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());// 적절한 응답 상태 및 내용으로 변경
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
