@@ -30,7 +30,9 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/advertisement")
@@ -43,15 +45,34 @@ public class AdvertisementController {
     private final AdvertisementMapper advertisementMapper;
     private final AwsS3UploadService awsS3UploadService;
 
+//    @PostMapping
+//    public ResponseEntity<Map<String, Object>> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
+//        Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
+//
+//        Advertisement createdAdvertisement = advertisementService.createAdvertisement(authentication.getPrincipal().toString(), advertisement);
+//        URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
+//
+//        // Advertisement와 ID를 함께 반환하는 Map을 생성
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("advertisement", createdAdvertisement);
+//        response.put("advertisementId", createdAdvertisement.getAdvertisementId());
+//
+//        return ResponseEntity.created(location).body(response);
+//    }
+
     @PostMapping
-    public ResponseEntity<Advertisement> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
+    public ResponseEntity<Long> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
 
         Advertisement createdAdvertisement = advertisementService.createAdvertisement(authentication.getPrincipal().toString(), advertisement);
         URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
 
-        return ResponseEntity.created(location).build();
+        // Advertisement ID만 반환
+        Long advertisementId = createdAdvertisement.getAdvertisementId();
+
+        return ResponseEntity.created(location).body(advertisementId);
     }
+
 
     @PostMapping(value="/upload/{advertisementId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<String>> uploadMultipleImages(@RequestParam("file") List<MultipartFile> files, @PathVariable Long advertisementId) {
