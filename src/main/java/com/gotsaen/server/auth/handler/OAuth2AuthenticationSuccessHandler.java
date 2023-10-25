@@ -106,8 +106,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         return UriComponentsBuilder
                 .newInstance()
                 .scheme("https")
-                .host("youad.store")
-                .port("3000")
+                .host("gotsaen.github.io")
                 .path("/client")
                 .queryParams(queryParams)
                 .build()
