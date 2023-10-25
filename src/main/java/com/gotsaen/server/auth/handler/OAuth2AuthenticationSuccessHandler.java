@@ -53,7 +53,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         ResponseCookie accessTokenCookie = ResponseCookie.from("Authorization", "Bearer" + accessToken)
                 .maxAge(60 * 60)
                 .path("/")
-                .secure(true)
+                .secure(false)
                 .sameSite("None")
                 .httpOnly(true)
                 .build();
@@ -63,7 +63,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .path("/")
                 .secure(true)
                 .sameSite("None")
-                .httpOnly(true)
+                .httpOnly(false)
                 .build();
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
