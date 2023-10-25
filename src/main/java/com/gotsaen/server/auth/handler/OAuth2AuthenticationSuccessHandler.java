@@ -55,13 +55,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .path("/")
                 .secure(false)
                 .sameSite("None")
-                .httpOnly(true)
+                .httpOnly(false)
                 .build();
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("Refresh", refreshToken)
                 .maxAge(7 * 24 * 60 * 60)
                 .path("/")
-                .secure(true)
+                .secure(false)
                 .sameSite("None")
                 .httpOnly(false)
                 .build();
