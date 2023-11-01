@@ -71,7 +71,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
         response.setHeader("UserType", "youtuber");
-        String uri = createURI().toString();
+        String uri = createURI(accessToken, refreshToken, username).toString();
         getRedirectStrategy().sendRedirect(request, response, uri);
     }
 
@@ -101,8 +101,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         return refreshToken;
     }
 
-    private URI createURI() {
+    private URI createURI(String accessToken, String refreshToken, String email) {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("Access_token", "Bearer " + accessToken);
+        queryParams.add("Refresh_token", refreshToken);
+        queryParams.add("Email", email);
+        queryParams.add("UserType", "youtuber");
+
         return UriComponentsBuilder
                 .newInstance()
                 .scheme("https")
