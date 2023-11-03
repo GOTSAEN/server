@@ -3,6 +3,7 @@ package com.gotsaen.server.member.controller;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
+import com.gotsaen.server.member.dto.MemberPasswordUpdateDto;
 import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.dto.MemberUpdateDto;
 import com.gotsaen.server.member.entity.Member;
@@ -36,6 +37,7 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<Member> postMember(@Valid @RequestBody MemberDto requestBody) {
+        requestBody.validatePassword();
         Member member = memberMapper.memberPostToMember(requestBody);
 
         Member createdMember = memberService.createMember(member);
@@ -48,9 +50,16 @@ public class MemberController {
     public ResponseEntity<?> updateMember(Authentication authentication, @RequestBody MemberUpdateDto updateDto) {
         memberService.checkAdvertiser(authentication);
 
-        Member updatedMember = memberService.updateMember(authentication.getPrincipal().toString(), updateDto);
+        MemberResponseDto updatedMember = memberService.updateMember(authentication.getPrincipal().toString(), updateDto);
         return ResponseEntity.ok(updatedMember);
+    }
 
+    @PatchMapping("/password")
+    public ResponseEntity<?> updateMemberPassword(Authentication authentication, @RequestBody MemberPasswordUpdateDto updateDto) {
+        memberService.checkAdvertiser(authentication);
+        updateDto.validatePassword();
+        MemberResponseDto updatedMemberPassword = memberService.updateMemberPassword(authentication.getPrincipal().toString(), updateDto);
+        return ResponseEntity.ok(updatedMemberPassword);
     }
 
     @GetMapping

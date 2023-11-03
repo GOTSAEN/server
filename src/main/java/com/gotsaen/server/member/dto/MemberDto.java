@@ -21,5 +21,9 @@ public class MemberDto {
     @NotBlank
     private String businessName;
     private String businessAddress;
-
+    public void validatePassword() {
+        if (password == null || !password.matches("^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$")) {
+            throw new IllegalArgumentException("비밀번호는 숫자와 문자를 포함하고 8자 이상이어야 합니다.");
+        }
+    }
 }
