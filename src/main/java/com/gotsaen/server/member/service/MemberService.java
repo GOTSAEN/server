@@ -13,6 +13,7 @@ import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.MemberRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
 import com.gotsaen.server.exception.ExceptionCode;
+import com.gotsaen.server.member.dto.MemberPasswordUpdateDto;
 import com.gotsaen.server.member.dto.MemberUpdateDto;
 import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.entity.Member;
@@ -87,19 +88,32 @@ public class MemberService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
-    public Member updateMember(String memberEmail, MemberUpdateDto updateDto) {
+    public MemberResponseDto updateMember(String memberEmail, MemberUpdateDto updateDto) {
         Member findMember = findMemberByEmail(memberEmail);
         updateDto.setMemberId(findMember.getMemberId());
         Member updateMember = memberMapper.memberUpdateToMember(updateDto);
 
-        Optional.ofNullable(updateMember.getPassword())
-                .ifPresent(findMember::setPassword);
         Optional.ofNullable(updateMember.getBusinessName())
                 .ifPresent(findMember::setBusinessName);
         Optional.ofNullable(updateMember.getBusinessAddress())
                 .ifPresent(findMember::setBusinessAddress);
+        memberRepository.save(findMember);
 
-        return memberRepository.save(findMember);
+        return memberMapper.memberToMemberResponse(findMember);
+    }
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE)
+    public MemberResponseDto updateMemberPassword(String memberEmail, MemberPasswordUpdateDto updateDto) {
+        Member findMember = findMemberByEmail(memberEmail);
+        if(!passwordEncoder.matches(updateDto.getCurrentPassword(), findMember.getPassword())){
+            throw new BusinessLogicException(ExceptionCode.PASSWORD_NOT_MATCH);
+        }
+
+        String encryptedPassword = passwordEncoder.encode(updateDto.getPassword());
+        findMember.setPassword(encryptedPassword);
+
+        memberRepository.save(findMember);
+
+        return memberMapper.memberToMemberResponse(findMember);
     }
     @Transactional(readOnly = true)
     public Member findMemberByEmail(String email) {

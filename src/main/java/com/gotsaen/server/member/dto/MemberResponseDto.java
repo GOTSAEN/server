@@ -8,6 +8,7 @@ import javax.validation.constraints.Email;
 @AllArgsConstructor
 @Getter
 public class MemberResponseDto {
+    private Long memberId;
     @Email
     private String email;
     private String businessName;
