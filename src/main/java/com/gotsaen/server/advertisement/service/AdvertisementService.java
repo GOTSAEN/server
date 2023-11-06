@@ -55,12 +55,18 @@ public class AdvertisementService {
 
         if (advertisementOptional.isPresent()) {
             Advertisement advertisement = advertisementOptional.get();
-            return advertisementMapper.advertisementToAdvertisementResponse(advertisement);
+            AdvertisementResponseDto responseDto = advertisementMapper.advertisementToAdvertisementResponse(advertisement);
+
+            // 이미지 URL 설정
+            if (!advertisement.getImageUrlList().isEmpty()) {
+                responseDto.setImageUrl(advertisement.getImageUrlList().get(0));
+            }
+
+            return responseDto;
         } else {
             throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
         }
     }
-
 
     @Transactional
     public Advertisement updateAdvertisement(String memberEmail, Long advertisementId, AdvertisementUpdateDto updateDto) {
@@ -107,11 +113,21 @@ public class AdvertisementService {
         Page<Advertisement> advertisementPage = advertisementRepository.findByCategory(category, pageable);
 
         List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
-                .map(advertisementMapper::advertisementToAdvertisementSummaryDto)
+                .map(advertisement -> {
+                    AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
+
+                    // 이미지 URL 설정
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
+                    return summaryDto;
+                })
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
+
 
     @Transactional
     public void deleteAdvertisement(String memberEmail, Long advertisementId) {
