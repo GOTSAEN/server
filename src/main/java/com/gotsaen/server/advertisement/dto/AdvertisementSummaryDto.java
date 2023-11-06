@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Getter
 public class AdvertisementSummaryDto {
@@ -13,4 +15,6 @@ public class AdvertisementSummaryDto {
     private String category;
     @Setter
     private int numberOfApplicants;
+    @Setter
+    private String imageUrl;
 }
