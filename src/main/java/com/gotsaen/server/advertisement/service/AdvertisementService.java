@@ -59,7 +59,7 @@ public class AdvertisementService {
 
             // 이미지 URL 설정
             if (!advertisement.getImageUrlList().isEmpty()) {
-                responseDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                responseDto.setImageUrls(advertisement.getImageUrlList());
             }
 
             return responseDto;
