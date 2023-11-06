@@ -89,6 +89,11 @@ public class AdvertisementService {
                     int numberOfApplicants = getAdvertisementApplicationCount(advertisement.getAdvertisementId());
                     AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
                     summaryDto.setNumberOfApplicants(numberOfApplicants);
+
+                    if (!advertisement.getImageUrlList().isEmpty()){
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
                     return summaryDto;
                 })
                 .collect(Collectors.toList());
