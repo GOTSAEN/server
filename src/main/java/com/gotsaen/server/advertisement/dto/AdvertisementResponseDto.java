@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -20,5 +21,5 @@ public class AdvertisementResponseDto {
     private String precaution;
     private Advertisement.Status status;
     @Setter
-    private String imageUrl;
+    private List<String> imageUrls;
 }
