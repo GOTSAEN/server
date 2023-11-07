@@ -50,5 +50,9 @@ public class ApplicationController {
         Application updatedApplication = applicationService.updateApplication(authentication.getPrincipal().toString(), applicationId, updateDto);
         return new ResponseEntity<>(updatedApplication,HttpStatus.OK);
     }
-
+    @GetMapping("/{advertisementId}")
+    public ResponseEntity<Boolean> checkAdvertisementApplication(@PathVariable Long advertisementId, Authentication authentication){
+        boolean check = applicationService.checkAdvertisementApplication(advertisementId, authentication.getPrincipal().toString());
+        return ResponseEntity.ok(check);
+    }
 }
