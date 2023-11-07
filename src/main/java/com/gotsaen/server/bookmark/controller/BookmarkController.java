@@ -40,4 +40,10 @@ public class BookmarkController {
 
         return new ResponseEntity<>(bookmarks, HttpStatus.OK);
     }
+
+    @GetMapping("/{advertisementId}")
+    public ResponseEntity<Boolean> checkAdvertisementBookmark(@PathVariable Long advertisementId, Authentication authentication){
+        boolean check = bookmarkService.checkAdvertisementBookmark(advertisementId, authentication.getPrincipal().toString());
+        return ResponseEntity.ok(check);
+    }
 }

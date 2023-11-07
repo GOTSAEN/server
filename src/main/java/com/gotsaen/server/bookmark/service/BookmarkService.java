@@ -61,4 +61,12 @@ public class BookmarkService {
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(bookmarks, bookmarksPage);
     }
+
+    public boolean checkAdvertisementBookmark(Long advertisementId, String email) {
+        YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
+
+        Bookmark bookmark = bookmarkRepository.findByYoutubeMemberIdAndAdvertisementId(youtubeMember.getYoutubeMemberId(), advertisementId);
+        return bookmark != null;
+    }
 }

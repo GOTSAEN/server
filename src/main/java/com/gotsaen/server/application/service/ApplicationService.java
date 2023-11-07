@@ -87,4 +87,12 @@ public class ApplicationService {
         return optionalApplication.orElseThrow(() ->
                 new BusinessLogicException(ExceptionCode.APPLICATION_NOT_FOUND));
     }
+
+    public boolean checkAdvertisementApplication(Long advertisementId, String email) {
+        YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
+
+        Application application = applicationRepository.findByYoutubeMemberIdAndAdvertisementId(youtubeMember.getYoutubeMemberId(), advertisementId);
+        return application != null;
+    }
 }
