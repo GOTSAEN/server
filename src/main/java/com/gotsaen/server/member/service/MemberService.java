@@ -6,7 +6,10 @@ import com.gotsaen.server.advertisement.dto.AdvertisementSummaryDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.application.dto.ApplicationAndAdInfoDto;
+import com.gotsaen.server.application.dto.ApplicationAndYoutuberInfoDto;
 import com.gotsaen.server.application.entity.Application;
+import com.gotsaen.server.application.mapper.ApplicationMapper;
 import com.gotsaen.server.application.repository.ApplicationRepository;
 import com.gotsaen.server.auth.utils.CustomAuthorityUtils;
 import com.gotsaen.server.dto.MultiResponseDto;
@@ -17,8 +20,10 @@ import com.gotsaen.server.member.dto.MemberPasswordUpdateDto;
 import com.gotsaen.server.member.dto.MemberUpdateDto;
 import com.gotsaen.server.member.dto.MemberResponseDto;
 import com.gotsaen.server.member.entity.Member;
+import com.gotsaen.server.member.entity.YoutubeMember;
 import com.gotsaen.server.member.mapper.MemberMapper;
 import com.gotsaen.server.member.repository.MemberRepository;
+import com.gotsaen.server.member.repository.YoutubeMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -52,7 +57,8 @@ public class MemberService {
     private final AdvertisementRepository advertisementRepository;
     private final ApplicationRepository applicationRepository;
     private final AdvertisementMapper advertisementMapper;
-
+    private final ApplicationMapper applicationMapper;
+    private final YoutubeMemberRepository youtubeMemberRepository;
     @Transactional(propagation = Propagation.REQUIRED)
     public Member createMember(Member member) {
         System.out.println("Creating a new member with email: " + member.getEmail());
@@ -151,8 +157,17 @@ public class MemberService {
         Member findMember = findMemberByEmail(memberEmail);
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Application> applicationsPage = applicationRepository.findByAdvertisementIdAndMemberId(advertisementId, findMember.getMemberId(), pageable);
-        List<Application> applications = new ArrayList<>();
+        List<ApplicationAndYoutuberInfoDto> applications = new ArrayList<>();
         applications =  applicationsPage.getContent().stream()
+                .map(application -> {
+                    ApplicationAndYoutuberInfoDto applicationAndYoutuberInfoDto = applicationMapper.applicationToApplicationAndYoutuberInfo(application);
+                    Optional<YoutubeMember> optionalYoutubeMember = youtubeMemberRepository.findById(application.getYoutubeMemberId());
+                    YoutubeMember youtubeMember = optionalYoutubeMember.orElseThrow(() ->
+                            new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
+                    applicationAndYoutuberInfoDto.setYoutubeMemberImage(youtubeMember.getAvatarUri());
+                    applicationAndYoutuberInfoDto.setYoutubeMemberNickname(youtubeMember.getNickname());
+                    return applicationAndYoutuberInfoDto;
+                })
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(applications, applicationsPage);
     }

@@ -1,6 +1,11 @@
 package com.gotsaen.server.member.service;
 
+import com.gotsaen.server.advertisement.entity.Advertisement;
+import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.advertisement.service.AdvertisementService;
+import com.gotsaen.server.application.dto.ApplicationAndAdInfoDto;
 import com.gotsaen.server.application.entity.Application;
+import com.gotsaen.server.application.mapper.ApplicationMapper;
 import com.gotsaen.server.application.repository.ApplicationRepository;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -30,6 +35,8 @@ public class YoutubeMemberService {
     private final YoutubeMemberRepository youtubeMemberRepository;
     private final ApplicationRepository applicationRepository;
     private final MemberMapper memberMapper;
+    private final ApplicationMapper applicationMapper;
+    private final AdvertisementRepository advertisementRepository;
     public YoutubeMemberResponseDto getYoutubeMember(String email) {
         YoutubeMember youtubeMember = findYoutubeMemberByEmail(email);
         return memberMapper.youtubeMemberToYoutubeMemberResponse(youtubeMember);
@@ -100,8 +107,20 @@ public class YoutubeMemberService {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Application> applicationsPage = applicationRepository.findByYoutubeMemberIdAndStatus(findYoutubeMember.getYoutubeMemberId(), status, pageable);
 
-        List<Application> applications = new ArrayList<>();
+        List<ApplicationAndAdInfoDto> applications = new ArrayList<>();
         applications =  applicationsPage.getContent().stream()
+                .map(application -> {
+                    ApplicationAndAdInfoDto applicationAndAdInfoDto = applicationMapper.applicationToApplicationAndAdInfoDto(application);
+                    Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(application.getAdvertisementId());
+                    Advertisement advertisement = optionalAdvertisement.orElseThrow(() ->
+                            new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND));
+                    applicationAndAdInfoDto.setAdName(advertisement.getProductName());
+                    applicationAndAdInfoDto.setAdCategory(advertisement.getCategory());
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        applicationAndAdInfoDto.setAdImage(advertisement.getImageUrlList().get(0));
+                    }
+                    return applicationAndAdInfoDto;
+                })
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(applications, applicationsPage);
     }
