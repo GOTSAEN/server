@@ -45,21 +45,6 @@ public class AdvertisementController {
     private final AdvertisementMapper advertisementMapper;
     private final AwsS3UploadService awsS3UploadService;
 
-//    @PostMapping
-//    public ResponseEntity<Map<String, Object>> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
-//        Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
-//
-//        Advertisement createdAdvertisement = advertisementService.createAdvertisement(authentication.getPrincipal().toString(), advertisement);
-//        URI location = UriCreator.createUri(ADVERTISEMENT_DEFAULT_URL, createdAdvertisement.getAdvertisementId());
-//
-//        // Advertisement와 ID를 함께 반환하는 Map을 생성
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("advertisement", createdAdvertisement);
-//        response.put("advertisementId", createdAdvertisement.getAdvertisementId());
-//
-//        return ResponseEntity.created(location).body(response);
-//    }
-
     @PostMapping
     public ResponseEntity<Long> postAdvertisement(Authentication authentication, @Valid @RequestBody AdvertisementDto.Post requestBody) {
         Advertisement advertisement = advertisementMapper.advertisementPostToAdvertisement(requestBody);
@@ -152,8 +137,18 @@ public class AdvertisementController {
         }
     }
 
+    @PatchMapping("/{advertisementId}/progressAd")
+    public ResponseEntity<?> waitingToProgress(Authentication authentication, @PathVariable Long advertisementId) {
+        try {
+            Advertisement updatedAdvertisement = advertisementService.waitingToProgress(authentication.getPrincipal().toString(), advertisementId);
+            return ResponseEntity.ok(updatedAdvertisement);
+        } catch (BusinessLogicException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PatchMapping("/{advertisementId}/finishAd")
-    public ResponseEntity<?> completeRecruitment(Authentication authentication, @PathVariable Long advertisementId) {
+    public ResponseEntity<?> progressToFinished(Authentication authentication, @PathVariable Long advertisementId) {
         try {
             Advertisement updatedAdvertisement = advertisementService.progressToFinished(authentication.getPrincipal().toString(), advertisementId);
             return ResponseEntity.ok(updatedAdvertisement);

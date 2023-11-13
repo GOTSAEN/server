@@ -155,7 +155,7 @@ public class AdvertisementService {
     }
     
     @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
-    public void waitingToProgress() {
+    public void waitingToProgressScheduling() {
         Date currentDate = new Date();
         List<Advertisement> advertisements = advertisementRepository.findByEndDateLessThan(currentDate);
 
@@ -164,6 +164,20 @@ public class AdvertisementService {
                 advertisement.setStatus(Advertisement.Status.PROGRESS);
                 advertisementRepository.save(advertisement);
             }
+        }
+    }
+
+    @Transactional
+    public Advertisement waitingToProgress(String memberEmail, Long advertisementId) {
+        Member member = memberService.findMemberByEmail(memberEmail);
+        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+
+        if (advertisement.getStatus() == Advertisement.Status.WAITING) {
+            advertisement.setStatus(Advertisement.Status.PROGRESS);
+            advertisementRepository.save(advertisement);
+            return advertisement;
+        } else {
+            throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
         }
     }
 
