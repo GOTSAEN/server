@@ -12,6 +12,7 @@ import java.sql.Date;
 
 @AllArgsConstructor
 @Getter
+@Setter
 public class AdvertisementByStatusDto {
     private Long advertisementId;
 
@@ -37,6 +38,5 @@ public class AdvertisementByStatusDto {
 
     private Advertisement.Status status;
 
-    @Setter
     private int numberOfApplicants;
 }

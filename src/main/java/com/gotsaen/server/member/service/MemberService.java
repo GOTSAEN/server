@@ -146,6 +146,9 @@ public class MemberService {
                     }
                     AdvertisementByStatusDto summaryDto = advertisementMapper.advertisementToAdvertisementByStatusDto(advertisement);
                     summaryDto.setNumberOfApplicants(numberOfApplicants);
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
                     return summaryDto;
                 })
                 .collect(Collectors.toList());
