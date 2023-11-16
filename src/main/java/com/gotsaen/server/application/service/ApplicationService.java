@@ -34,7 +34,7 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final MemberRepository memberRepository;
     @Transactional
-    public void createOrDeleteApplication(ApplicationDto requestBody, String email) {
+    public boolean createOrDeleteApplication(ApplicationDto requestBody, String email) {
         YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
         Advertisement advertisement = advertisementRepository.findById(requestBody.getAdvertisementId())
@@ -46,6 +46,7 @@ public class ApplicationService {
 
         if(existingApplication != null){
             applicationRepository.delete(existingApplication);
+            return false;
         }
         else{
             Application application = new Application();
@@ -53,6 +54,7 @@ public class ApplicationService {
             application.setMemberId(requestBody.getMemberId());
             application.setYoutubeMemberId(youtubeMember.getYoutubeMemberId());
             applicationRepository.save(application);
+            return true;
         }
     }
 

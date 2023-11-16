@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class AdvertisementResponseDto {
+    private Long memberId;
     private String productName;
     private Long numberOfRecruit;
     private Date startDate;

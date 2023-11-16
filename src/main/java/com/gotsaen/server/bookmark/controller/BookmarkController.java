@@ -23,11 +23,11 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
     private final OAuth2MemberService oAuth2MemberService;
     @PostMapping
-    public ResponseEntity postBookmark(@Valid @RequestBody BookmarkDto requestBody, Authentication authentication){
+    public ResponseEntity<Boolean> postBookmark(@Valid @RequestBody BookmarkDto requestBody, Authentication authentication){
         oAuth2MemberService.checkYoutuber(authentication);
-        bookmarkService.createOrDeleteBookmark(requestBody, authentication.getPrincipal().toString());
+        boolean check = bookmarkService.createOrDeleteBookmark(requestBody, authentication.getPrincipal().toString());
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(check);
     }
 
     @GetMapping
