@@ -2,8 +2,10 @@ package com.gotsaen.server.bookmark.service;
 
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.bookmark.dto.BookmarkAndAdInfoDto;
 import com.gotsaen.server.bookmark.dto.BookmarkDto;
 import com.gotsaen.server.bookmark.entity.Bookmark;
+import com.gotsaen.server.bookmark.mapper.BookmarkMapper;
 import com.gotsaen.server.bookmark.repository.BookmarkRepository;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -29,8 +31,9 @@ public class BookmarkService {
     private final YoutubeMemberRepository youtubeMemberRepository;
     private final AdvertisementRepository advertisementRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final BookmarkMapper bookmarkMapper;
     @Transactional
-    public void createOrDeleteBookmark(BookmarkDto requestBody, String youtubeMemberEmail) {
+    public boolean createOrDeleteBookmark(BookmarkDto requestBody, String youtubeMemberEmail) {
         YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(youtubeMemberEmail)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
         Advertisement advertisement = advertisementRepository.findById(requestBody.getAdvertisementId())
@@ -40,6 +43,7 @@ public class BookmarkService {
 
         if(existingBookmark != null){
             bookmarkRepository.delete(existingBookmark);
+            return false;
         }
         else {
             Bookmark bookmark = new Bookmark();
@@ -47,6 +51,7 @@ public class BookmarkService {
             bookmark.setMemberId(requestBody.getMemberId());
             bookmark.setYoutubeMemberId(youtubeMember.getYoutubeMemberId());
             bookmarkRepository.save(bookmark);
+            return true;
         }
     }
 
@@ -56,8 +61,23 @@ public class BookmarkService {
                 new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Bookmark> bookmarksPage = bookmarkRepository.findByYoutubeMemberId(findYoutubeMember.getYoutubeMemberId(), pageable);
-        List<Bookmark> bookmarks = new ArrayList<>();
+
+        List<BookmarkAndAdInfoDto> bookmarks = new ArrayList<>();
         bookmarks = bookmarksPage.getContent().stream()
+                .map(bookmark -> {
+                    BookmarkAndAdInfoDto bookmarkAndAdInfoDto = bookmarkMapper.bookmarkToBookmarkAndAdInfoDto(bookmark);
+                    Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(bookmark.getAdvertisementId());
+                    Advertisement advertisement = optionalAdvertisement.orElseThrow(() ->
+                            new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND));
+                    bookmarkAndAdInfoDto.setAdName(advertisement.getProductName());
+                    bookmarkAndAdInfoDto.setAdCategory(advertisement.getCategory());
+                    bookmarkAndAdInfoDto.setAdEndDate(advertisement.getEndDate());
+                    bookmarkAndAdInfoDto.setAdNumberOfRecruit(advertisement.getNumberOfRecruit());
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        bookmarkAndAdInfoDto.setAdImage(advertisement.getImageUrlList().get(0));
+                    }
+                    return bookmarkAndAdInfoDto;
+                })
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(bookmarks, bookmarksPage);
     }

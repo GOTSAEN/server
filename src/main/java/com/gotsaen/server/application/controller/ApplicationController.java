@@ -27,10 +27,10 @@ public class ApplicationController {
     private final OAuth2MemberService oAuth2MemberService;
 
     @PostMapping
-    public ResponseEntity postApplication(@Valid @RequestBody ApplicationDto requestBody, Authentication authentication){
+    public ResponseEntity<Boolean> postApplication(@Valid @RequestBody ApplicationDto requestBody, Authentication authentication){
         oAuth2MemberService.checkYoutuber(authentication);
-        applicationService.createOrDeleteApplication(requestBody, authentication.getPrincipal().toString());
-        return new ResponseEntity<>(HttpStatus.OK);
+        boolean check = applicationService.createOrDeleteApplication(requestBody, authentication.getPrincipal().toString());
+        return ResponseEntity.ok(check);
     }
 
     @GetMapping
