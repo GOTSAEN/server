@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
    Page<Advertisement> findAll(Pageable pageable);
    Page<Advertisement> findByCategory(String category, Pageable pageable);
+   Page<Advertisement> findByStatus(Advertisement.Status status, Pageable pageable);
    Page<Advertisement> findByStatusAndMemberId(Advertisement.Status status, Long memberId, Pageable pageable);
    Optional<Advertisement> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId);
    List<Advertisement> findByEndDateLessThan(Date date);

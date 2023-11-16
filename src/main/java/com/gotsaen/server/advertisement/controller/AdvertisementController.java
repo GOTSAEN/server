@@ -127,6 +127,22 @@ public class AdvertisementController {
                 .body(advertisementResponse);
     }
 
+    @GetMapping("/byStatus")
+    public ResponseEntity<MultiResponseDto<AdvertisementSummaryDto>> getAdvertisementsByStatus(
+            @RequestParam(name = "status") Advertisement.Status status,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        MultiResponseDto<AdvertisementSummaryDto> advertisementResponse = advertisementService.getAdvertisementsByStatus(status, page, size);
+
+        PageInfo pageInfo = advertisementResponse.getPageInfo();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Page-Info", pageInfo.toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(advertisementResponse);
+    }
+
     @DeleteMapping("/{advertisementId}")
     public ResponseEntity<?> deleteAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
         try {

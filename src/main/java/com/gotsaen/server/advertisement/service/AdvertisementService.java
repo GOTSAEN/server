@@ -129,6 +129,27 @@ public class AdvertisementService {
     }
 
 
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsByStatus(Advertisement.Status status, int page, int size) {
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Advertisement> advertisementPage = advertisementRepository.findByStatus(status, pageable);
+
+        List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
+                .map(advertisement -> {
+                    AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
+
+                    // 이미지 URL 설정
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
+                    return summaryDto;
+                })
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
+    }
+
+
     @Transactional
     public void deleteAdvertisement(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
