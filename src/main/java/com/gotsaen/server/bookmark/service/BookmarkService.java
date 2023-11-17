@@ -69,12 +69,12 @@ public class BookmarkService {
                     Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(bookmark.getAdvertisementId());
                     Advertisement advertisement = optionalAdvertisement.orElseThrow(() ->
                             new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND));
-                    bookmarkAndAdInfoDto.setAdName(advertisement.getProductName());
-                    bookmarkAndAdInfoDto.setAdCategory(advertisement.getCategory());
-                    bookmarkAndAdInfoDto.setAdEndDate(advertisement.getEndDate());
-                    bookmarkAndAdInfoDto.setAdNumberOfRecruit(advertisement.getNumberOfRecruit());
+                    bookmarkAndAdInfoDto.setProductName(advertisement.getProductName());
+                    bookmarkAndAdInfoDto.setCategory(advertisement.getCategory());
+                    bookmarkAndAdInfoDto.setEndDate(advertisement.getEndDate());
+                    bookmarkAndAdInfoDto.setNumberOfRecruit(advertisement.getNumberOfRecruit());
                     if (!advertisement.getImageUrlList().isEmpty()) {
-                        bookmarkAndAdInfoDto.setAdImage(advertisement.getImageUrlList().get(0));
+                        bookmarkAndAdInfoDto.setImageUrl(advertisement.getImageUrlList().get(0));
                     }
                     return bookmarkAndAdInfoDto;
                 })

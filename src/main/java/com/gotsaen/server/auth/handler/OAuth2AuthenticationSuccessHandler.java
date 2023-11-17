@@ -103,7 +103,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private URI createURI(String accessToken, String refreshToken, String email) {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.add("Access_token", "Bearer " + accessToken);
+        queryParams.add("Access_token", "Bearer" + accessToken);
         queryParams.add("Refresh_token", refreshToken);
         queryParams.add("Email", email);
         queryParams.add("UserType", "youtuber");
