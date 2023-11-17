@@ -15,9 +15,9 @@ public class BookmarkAndAdInfoDto {
     private Long memberId;
     private Long advertisementId;
     private Long youtubeMemberId;
-    private String adName;
-    private String adCategory;
-    private Date adEndDate;
-    private Long adNumberOfRecruit;
-    private String adImage;
+    private String productName;
+    private String category;
+    private Date endDate;
+    private Long numberOfRecruit;
+    private String imageUrl;
 }
