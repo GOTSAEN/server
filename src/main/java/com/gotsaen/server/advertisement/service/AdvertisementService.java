@@ -6,7 +6,11 @@ import com.gotsaen.server.advertisement.dto.AdvertisementUpdateDto;
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.mapper.AdvertisementMapper;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.application.entity.Application;
+import com.gotsaen.server.application.repository.ApplicationRepository;
 import com.gotsaen.server.application.service.ApplicationService;
+import com.gotsaen.server.bookmark.entity.Bookmark;
+import com.gotsaen.server.bookmark.repository.BookmarkRepository;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.event.AdvertisementRegistrationApplicationEvent;
 import com.gotsaen.server.exception.BusinessLogicException;
@@ -25,9 +29,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -40,6 +47,8 @@ public class AdvertisementService {
 
     private final MemberService memberService;
     private final ApplicationService applicationService;
+    private final ApplicationRepository applicationRepository;
+    private final BookmarkRepository bookmarkRepository;
 
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -61,6 +70,9 @@ public class AdvertisementService {
             if (!advertisement.getImageUrlList().isEmpty()) {
                 responseDto.setImageUrls(advertisement.getImageUrlList());
             }
+
+            int numberOfBookmarks = bookmarkRepository.countByAdvertisementId(advertisementId);
+            responseDto.setNumberOfBookmarks(numberOfBookmarks);
 
             return responseDto;
         } else {
@@ -149,14 +161,74 @@ public class AdvertisementService {
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
 
+    @Transactional(readOnly = true)
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithNearDeadline(int page, int size) {
+        Date currentDate = new Date();
+        Date fiveDaysLater = new Date(currentDate.getTime() + TimeUnit.DAYS.toMillis(5));
+
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Advertisement> advertisementPage = advertisementRepository.findByEndDateBetween(currentDate, fiveDaysLater, pageable);
+
+        List<AdvertisementSummaryDto> advertisements = advertisementPage.getContent().stream()
+                .map(advertisement -> {
+                    AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
+
+                    // 필요한 경우 다른 속성 설정
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
+                    return summaryDto;
+                })
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(advertisements, advertisementPage);
+    }
+
+    @Transactional(readOnly = true)
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithMostBookmarks(int page, int size) {
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Advertisement> advertisementPage = advertisementRepository.findAll(pageable);
+
+        List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
+                .map(advertisement -> {
+                    int numberOfBookmarks = bookmarkRepository.countByAdvertisementId(advertisement.getAdvertisementId());
+                    AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
+                    summaryDto.setNumberOfBookmarks(numberOfBookmarks);
+
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
+                    return summaryDto;
+                })
+                .sorted(Comparator.comparingInt(AdvertisementSummaryDto::getNumberOfBookmarks).reversed())
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
+    }
+
 
     @Transactional
     public void deleteAdvertisement(String memberEmail, Long advertisementId) {
         Member member = memberService.findMemberByEmail(memberEmail);
         Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+
+        // 삭제 전에 연관된 application 및 bookmark을 찾아서 삭제
+        List<Application> applications = applicationRepository.findByAdvertisementId(advertisementId);
+        List<Bookmark> bookmarks = bookmarkRepository.findByAdvertisementId(advertisementId);
+
+        for (Application application : applications) {
+            applicationRepository.delete(application);
+        }
+
+        for (Bookmark bookmark : bookmarks) {
+            bookmarkRepository.delete(bookmark);
+        }
+
+        // Advertisement 삭제
         advertisementRepository.delete(advertisement);
     }
-
 
     @Transactional
     public void saveImageUrl(Long advertisementId, String imageUrl) {

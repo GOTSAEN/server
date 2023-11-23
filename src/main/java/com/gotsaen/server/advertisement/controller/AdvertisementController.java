@@ -11,8 +11,6 @@ import com.gotsaen.server.advertisement.service.AwsS3UploadService;
 import com.gotsaen.server.dto.MultiResponseDto;
 import com.gotsaen.server.dto.PageInfo;
 import com.gotsaen.server.exception.BusinessLogicException;
-import com.gotsaen.server.member.entity.Member;
-import com.gotsaen.server.member.service.MemberService;
 import com.gotsaen.server.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/advertisement")
@@ -141,6 +135,21 @@ public class AdvertisementController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(advertisementResponse);
+    }
+
+    @GetMapping("/nearDeadline")
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithNearDeadline(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return advertisementService.getAdvertisementsWithNearDeadline(page, size);
+    }
+
+    @GetMapping("/mostBookmarked")
+    public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithMostBookmarks(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return advertisementService.getAdvertisementsWithMostBookmarks(page, size);
     }
 
     @DeleteMapping("/{advertisementId}")
