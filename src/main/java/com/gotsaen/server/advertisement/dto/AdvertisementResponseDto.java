@@ -23,4 +23,6 @@ public class AdvertisementResponseDto {
     private Advertisement.Status status;
     @Setter
     private List<String> imageUrls;
+    @Setter
+    int numberOfBookmarks;
 }

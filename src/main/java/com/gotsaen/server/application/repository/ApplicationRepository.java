@@ -1,9 +1,12 @@
 package com.gotsaen.server.application.repository;
 
+import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.application.entity.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     Application findByYoutubeMemberIdAndAdvertisementId(Long youtubeMemberId, Long advertisementId);
@@ -15,4 +18,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     int countByAdvertisementIdAndStatus(Long advertisementId, Application.Status status);
 
     Page<Application> findByYoutubeMemberIdAndStatus(Long youtubeMemberId, Application.Status status, Pageable pageable);
+
+    List<Application> findByAdvertisementId(Long advertisementId);
 }

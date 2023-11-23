@@ -13,8 +13,11 @@ public class AdvertisementSummaryDto {
     private String productName;
     private Long numberOfRecruit;
     private String category;
+
     @Setter
     private int numberOfApplicants;
     @Setter
     private String imageUrl;
+    @Setter
+    int numberOfBookmarks;
 }

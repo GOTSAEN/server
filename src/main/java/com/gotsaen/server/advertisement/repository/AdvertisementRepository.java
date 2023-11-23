@@ -2,10 +2,12 @@ package com.gotsaen.server.advertisement.repository;
 
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +21,6 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
    Optional<Advertisement> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId);
    List<Advertisement> findByEndDateLessThan(Date date);
    Page<Advertisement> findByProductNameContainingIgnoreCase(String keyword, Pageable pageable);
+   Page<Advertisement> findByEndDateBetween(Date currentDate, Date fiveDaysLater, Pageable pageable);
+
 }
