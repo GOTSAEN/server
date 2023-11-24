@@ -59,9 +59,10 @@ public class AdvertisementService {
         }
 
         // 광고를 저장하기 전에 시작일이 현재 날짜 이후인지 확인
-        if (advertisement.getStartDate().before(new Date())) {
+        if (!advertisement.getStartDate().equals(new Date()) && advertisement.getStartDate().before(new Date())) {
             throw new BusinessLogicException(ExceptionCode.INVALID_START_DATE);
         }
+
 
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
         advertisement.setMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
@@ -118,7 +119,7 @@ public class AdvertisementService {
                     AdvertisementSummaryDto summaryDto = advertisementMapper.advertisementToAdvertisementSummaryDto(advertisement);
                     summaryDto.setNumberOfApplicants(numberOfApplicants);
 
-                    if (!advertisement.getImageUrlList().isEmpty()){
+                    if (!advertisement.getImageUrlList().isEmpty()) {
                         summaryDto.setImageUrl(advertisement.getImageUrlList().get(0));
                     }
 
@@ -256,7 +257,7 @@ public class AdvertisementService {
             throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
         }
     }
-    
+
     @Scheduled(cron = "0 0 * * * *" /*fixedRate = 60000*/) // 매 정각에 실행
     public void waitingToProgressScheduling() {
         Date currentDate = new Date();
