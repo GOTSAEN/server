@@ -159,9 +159,23 @@ public class MemberService {
     public MultiResponseDto findApplicationsByAdvertisementAndMember(String memberEmail, Long advertisementId, int page, int size) {
         Member findMember = findMemberByEmail(memberEmail);
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
+        Advertisement advertisement = optionalAdvertisement.orElseThrow(() ->
+                new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND));
         Page<Application> applicationsPage = applicationRepository.findByAdvertisementIdAndMemberId(advertisementId, findMember.getMemberId(), pageable);
         List<ApplicationAndYoutuberInfoDto> applications = new ArrayList<>();
         applications =  applicationsPage.getContent().stream()
+                .filter(applicationDto ->
+                        (advertisement.getStatus() == Advertisement.Status.WAITING &&
+                                (applicationDto.getStatus() == Application.Status.WAITING ||
+                                        applicationDto.getStatus() == Application.Status.PROGRESS ||
+                                        applicationDto.getStatus() == Application.Status.UNSELECTED)) ||
+                                (advertisement.getStatus() == Advertisement.Status.PROGRESS &&
+                                        (applicationDto.getStatus() == Application.Status.PROGRESS ||
+                                                applicationDto.getStatus() == Application.Status.FINISHED ||
+                                                applicationDto.getStatus() == Application.Status.REJECTION)) ||
+                                (advertisement.getStatus() == Advertisement.Status.FINISHED &&
+                                        applicationDto.getStatus() == Application.Status.FINISHED))
                 .map(application -> {
                     ApplicationAndYoutuberInfoDto applicationAndYoutuberInfoDto = applicationMapper.applicationToApplicationAndYoutuberInfo(application);
                     Optional<YoutubeMember> optionalYoutubeMember = youtubeMemberRepository.findById(application.getYoutubeMemberId());
