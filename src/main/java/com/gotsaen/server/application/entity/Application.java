@@ -29,6 +29,6 @@ public class Application extends Auditable {
     private Status status = Status.WAITING;
     @Getter
     public enum Status {
-        WAITING, PROGRESS, REJECTION, FINISHED;
+        WAITING, UNSELECTED, PROGRESS, REJECTION, FINISHED;
     }
 }
