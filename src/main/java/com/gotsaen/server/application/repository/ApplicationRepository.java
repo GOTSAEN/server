@@ -20,4 +20,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Page<Application> findByYoutubeMemberIdAndStatus(Long youtubeMemberId, Application.Status status, Pageable pageable);
 
     List<Application> findByAdvertisementId(Long advertisementId);
+
+    List<Application> findByAdvertisementIdAndStatus(Long advertisementId, Application.Status status);
 }
