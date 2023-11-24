@@ -2,6 +2,8 @@ package com.gotsaen.server.bookmark.service;
 
 import com.gotsaen.server.advertisement.entity.Advertisement;
 import com.gotsaen.server.advertisement.repository.AdvertisementRepository;
+import com.gotsaen.server.application.entity.Application;
+import com.gotsaen.server.application.repository.ApplicationRepository;
 import com.gotsaen.server.bookmark.dto.BookmarkAndAdInfoDto;
 import com.gotsaen.server.bookmark.dto.BookmarkDto;
 import com.gotsaen.server.bookmark.entity.Bookmark;
@@ -57,13 +59,20 @@ public class BookmarkService {
 
     public MultiResponseDto findBookmarkByYoutubeMember(String youtubeMemberEmail, int page, int size) {
         Optional<YoutubeMember> optionalYoutubeMember = youtubeMemberRepository.findByEmail(youtubeMemberEmail);
+
         YoutubeMember findYoutubeMember = optionalYoutubeMember.orElseThrow(() ->
                 new BusinessLogicException(ExceptionCode.YOUTUBER_NOT_FOUND));
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Bookmark> bookmarksPage = bookmarkRepository.findByYoutubeMemberId(findYoutubeMember.getYoutubeMemberId(), pageable);
 
-        List<BookmarkAndAdInfoDto> bookmarks = new ArrayList<>();
-        bookmarks = bookmarksPage.getContent().stream()
+        List<BookmarkAndAdInfoDto> bookmarks = bookmarksPage.getContent().stream()
+                .filter(bookmark -> {
+                    Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(bookmark.getAdvertisementId());
+                    Advertisement advertisement = optionalAdvertisement.orElseThrow(() ->
+                            new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND));
+                    // waiting 상태인 광고만 필터링
+                    return advertisement.getStatus().equals(Advertisement.Status.WAITING);
+                })
                 .map(bookmark -> {
                     BookmarkAndAdInfoDto bookmarkAndAdInfoDto = bookmarkMapper.bookmarkToBookmarkAndAdInfoDto(bookmark);
                     Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(bookmark.getAdvertisementId());
@@ -81,6 +90,7 @@ public class BookmarkService {
                 .collect(Collectors.toList());
         return new MultiResponseDto<>(bookmarks, bookmarksPage);
     }
+
 
     public boolean checkAdvertisementBookmark(Long advertisementId, String email) {
         YoutubeMember youtubeMember = youtubeMemberRepository.findByEmail(email)
