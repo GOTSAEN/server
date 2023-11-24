@@ -53,6 +53,16 @@ public class AdvertisementService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Advertisement createAdvertisement(String memberEmail, Advertisement advertisement) {
+        // 시작일이 종료일보다 늦을 경우 예외 처리
+        if (advertisement.getStartDate().after(advertisement.getEndDate())) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_RANGE);
+        }
+
+        // 광고를 저장하기 전에 시작일이 현재 날짜 이후인지 확인
+        if (advertisement.getStartDate().before(new Date())) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_START_DATE);
+        }
+
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
         advertisement.setMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
         publisher.publishEvent(new AdvertisementRegistrationApplicationEvent(savedAdvertisement));
@@ -279,6 +289,12 @@ public class AdvertisementService {
         Member member = memberService.findMemberByEmail(memberEmail);
         Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
 
+        // "REJECTION" 상태의 지원서가 있는지 확인
+        List<Application> rejectionApplications = applicationRepository.findByAdvertisementIdAndStatus(advertisementId, Application.Status.REJECTION);
+        if (!rejectionApplications.isEmpty()) {
+            throw new BusinessLogicException(ExceptionCode.CANNOT_END_WITH_REJECTION);
+        }
+
         if (advertisement.getStatus() == Advertisement.Status.PROGRESS) {
             advertisement.setStatus(Advertisement.Status.FINISHED);
             advertisementRepository.save(advertisement);
@@ -287,6 +303,7 @@ public class AdvertisementService {
             throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
         }
     }
+
 
     public int getAdvertisementApplicationCount(Long advertisementId) {
         Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
