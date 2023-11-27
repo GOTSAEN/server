@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -151,7 +150,6 @@ public class AdvertisementService {
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
 
-
     public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsByStatus(Advertisement.Status status, int page, int size) {
         PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Advertisement> advertisementPage = advertisementRepository.findByStatus(status, pageable);
@@ -219,26 +217,24 @@ public class AdvertisementService {
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAdvertisement(String memberEmail, Long advertisementId) throws BusinessLogicException {
+        try {
+            Member member = memberService.findMemberByEmail(memberEmail);
+            Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
 
-    @Transactional
-    public void deleteAdvertisement(String memberEmail, Long advertisementId) {
-        Member member = memberService.findMemberByEmail(memberEmail);
-        Advertisement advertisement = getAdvertisementByIdAndMemberId(advertisementId, member);
+            // 삭제 전에 연관된 application 및 bookmark을 찾아서 삭제
+            List<Application> applications = applicationRepository.findByAdvertisementId(advertisementId);
+            List<Bookmark> bookmarks = bookmarkRepository.findByAdvertisementId(advertisementId);
 
-        // 삭제 전에 연관된 application 및 bookmark을 찾아서 삭제
-        List<Application> applications = applicationRepository.findByAdvertisementId(advertisementId);
-        List<Bookmark> bookmarks = bookmarkRepository.findByAdvertisementId(advertisementId);
+            applicationRepository.deleteAll(applications);
+            bookmarkRepository.deleteAll(bookmarks);
 
-        for (Application application : applications) {
-            applicationRepository.delete(application);
+            // Advertisement 삭제
+            advertisementRepository.delete(advertisement);
+        } catch (Exception e) {
+            throw new BusinessLogicException(ExceptionCode.ADVERTISEMENT_NOT_FOUND);
         }
-
-        for (Bookmark bookmark : bookmarks) {
-            bookmarkRepository.delete(bookmark);
-        }
-
-        // Advertisement 삭제
-        advertisementRepository.delete(advertisement);
     }
 
     @Transactional
@@ -304,7 +300,6 @@ public class AdvertisementService {
             throw new BusinessLogicException(ExceptionCode.INVALID_ADVERTISEMENT_STATUS);
         }
     }
-
 
     public int getAdvertisementApplicationCount(Long advertisementId) {
         Optional<Advertisement> optionalAdvertisement = advertisementRepository.findById(advertisementId);
