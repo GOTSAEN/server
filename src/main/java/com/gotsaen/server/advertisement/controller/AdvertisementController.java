@@ -15,7 +15,6 @@ import com.gotsaen.server.utils.UriCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -52,41 +51,34 @@ public class AdvertisementController {
         return ResponseEntity.created(location).body(advertisementId);
     }
 
-
     @PostMapping(value="/upload/{advertisementId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String>> uploadMultipleImages(@RequestParam("file") List<MultipartFile> files, @PathVariable Long advertisementId) {
-        try {
-            // 다중 이미지를 업로드하고 이미지 URL 목록을 받아옴.
-            List<String> imageUrls = awsS3UploadService.uploadImages(files);
-            for (String imageUrl : imageUrls) {
-                advertisementService.saveImageUrl(advertisementId, imageUrl);
-            }
-            return ResponseEntity.ok(imageUrls);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+    public ResponseEntity<List<String>> uploadMultipleImages(
+            @RequestParam("file") List<MultipartFile> files,
+            @PathVariable Long advertisementId) throws IOException {
+
+        List<String> imageUrls = awsS3UploadService.uploadImages(files);
+
+        for (String imageUrl : imageUrls) {
+            advertisementService.saveImageUrl(advertisementId, imageUrl);
         }
+
+        return ResponseEntity.ok(imageUrls);
     }
+
     @GetMapping("/{advertisementId}")
-    public ResponseEntity<?> getAdvertisement(@PathVariable Long advertisementId) {
-        try {
-            AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(advertisementId);
-            return ResponseEntity.ok(advertisementResponseDto);
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<?> getAdvertisement(@PathVariable Long advertisementId) throws BusinessLogicException {
+        AdvertisementResponseDto advertisementResponseDto = advertisementService.getAdvertisement(advertisementId);
+        return ResponseEntity.ok(advertisementResponseDto);
     }
 
     @PatchMapping("/{advertisementId}")
     public ResponseEntity<?> updateAdvertisement(
             Authentication authentication,
             @PathVariable Long advertisementId,
-            @RequestBody AdvertisementUpdateDto updateDto) {
-        try {
-            Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(authentication.getPrincipal().toString(), advertisementId, updateDto);
-            return ResponseEntity.ok(updatedAdvertisement);
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            @RequestBody AdvertisementUpdateDto updateDto) throws BusinessLogicException {
+
+        Advertisement updatedAdvertisement = advertisementService.updateAdvertisement(authentication.getPrincipal().toString(), advertisementId, updateDto);
+        return ResponseEntity.ok(updatedAdvertisement);
     }
 
     @GetMapping("/allAd")
@@ -153,32 +145,20 @@ public class AdvertisementController {
     }
 
     @DeleteMapping("/{advertisementId}")
-    public ResponseEntity<?> deleteAdvertisement(Authentication authentication, @PathVariable Long advertisementId) {
-        try {
-            advertisementService.deleteAdvertisement(authentication.getPrincipal().toString(), advertisementId);
-            return ResponseEntity.noContent().build();
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<?> deleteAdvertisement(Authentication authentication, @PathVariable Long advertisementId) throws BusinessLogicException {
+        advertisementService.deleteAdvertisement(authentication.getPrincipal().toString(), advertisementId);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{advertisementId}/progressAd")
-    public ResponseEntity<?> waitingToProgress(Authentication authentication, @PathVariable Long advertisementId) {
-        try {
-            Advertisement updatedAdvertisement = advertisementService.waitingToProgress(authentication.getPrincipal().toString(), advertisementId);
-            return ResponseEntity.ok(updatedAdvertisement);
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<?> waitingToProgress(Authentication authentication, @PathVariable Long advertisementId) throws BusinessLogicException {
+        Advertisement updatedAdvertisement = advertisementService.waitingToProgress(authentication.getPrincipal().toString(), advertisementId);
+        return ResponseEntity.ok(updatedAdvertisement);
     }
 
     @PatchMapping("/{advertisementId}/finishAd")
-    public ResponseEntity<?> progressToFinished(Authentication authentication, @PathVariable Long advertisementId) {
-        try {
-            Advertisement updatedAdvertisement = advertisementService.progressToFinished(authentication.getPrincipal().toString(), advertisementId);
-            return ResponseEntity.ok(updatedAdvertisement);
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<?> progressToFinished(Authentication authentication, @PathVariable Long advertisementId) throws BusinessLogicException {
+        Advertisement updatedAdvertisement = advertisementService.progressToFinished(authentication.getPrincipal().toString(), advertisementId);
+        return ResponseEntity.ok(updatedAdvertisement);
     }
 }
