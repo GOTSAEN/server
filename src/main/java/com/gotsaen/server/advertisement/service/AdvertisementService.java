@@ -62,7 +62,6 @@ public class AdvertisementService {
             throw new BusinessLogicException(ExceptionCode.INVALID_START_DATE);
         }
 
-
         Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
         advertisement.setMemberId(memberService.findMemberByEmail(memberEmail).getMemberId());
         publisher.publishEvent(new AdvertisementRegistrationApplicationEvent(savedAdvertisement));
@@ -170,13 +169,14 @@ public class AdvertisementService {
         return new MultiResponseDto<>(advertisementSummaries, advertisementPage);
     }
 
+    // YourService.java
     @Transactional(readOnly = true)
     public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithNearDeadline(int page, int size) {
         Date currentDate = new Date();
         Date fiveDaysLater = new Date(currentDate.getTime() + TimeUnit.DAYS.toMillis(5));
 
         PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-        Page<Advertisement> advertisementPage = advertisementRepository.findByEndDateBetween(currentDate, fiveDaysLater, pageable);
+        Page<Advertisement> advertisementPage = advertisementRepository.findByEndDateBetweenAndStatus(currentDate, fiveDaysLater, Advertisement.Status.WAITING, pageable);
 
         List<AdvertisementSummaryDto> advertisements = advertisementPage.getContent().stream()
                 .map(advertisement -> {
@@ -194,10 +194,11 @@ public class AdvertisementService {
         return new MultiResponseDto<>(advertisements, advertisementPage);
     }
 
+
     @Transactional(readOnly = true)
     public MultiResponseDto<AdvertisementSummaryDto> getAdvertisementsWithMostBookmarks(int page, int size) {
         PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-        Page<Advertisement> advertisementPage = advertisementRepository.findAll(pageable);
+        Page<Advertisement> advertisementPage = advertisementRepository.findByStatus(Advertisement.Status.WAITING, pageable);
 
         List<AdvertisementSummaryDto> advertisementSummaries = advertisementPage.getContent().stream()
                 .map(advertisement -> {

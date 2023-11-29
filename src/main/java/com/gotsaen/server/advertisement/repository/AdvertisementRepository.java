@@ -21,7 +21,6 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
    Optional<Advertisement> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId);
    List<Advertisement> findByEndDateLessThan(Date date);
    Page<Advertisement> findByProductNameContainingIgnoreCase(String keyword, Pageable pageable);
-   Page<Advertisement> findByEndDateBetween(Date currentDate, Date fiveDaysLater, Pageable pageable);
-
+   Page<Advertisement> findByEndDateBetweenAndStatus(Date currentDate, Date fiveDaysLater, Advertisement.Status status, Pageable pageable);
 
 }
