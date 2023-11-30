@@ -23,9 +23,9 @@ public class SearchService {
     private final SearchMapper searchMapper;
 
     @Transactional(readOnly = true)
-    public MultiResponseDto<SearchAdvertisementDto> searchAdvertisement(String keyword, int page, int size) {
+    public MultiResponseDto<SearchAdvertisementDto> searchAdvertisements(String keyword, int page, int size) {
         PageRequest pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-        Page<Advertisement> searchPage = advertisementRepository.findByProductNameContainingIgnoreCase(keyword, pageable);
+        Page<Advertisement> searchPage = advertisementRepository.findByStatusAndProductNameContainingIgnoreCase(Advertisement.Status.WAITING, keyword, pageable);
 
         List<SearchAdvertisementDto> searchResults = searchPage.getContent().stream()
                 .map(advertisement -> {
@@ -42,4 +42,5 @@ public class SearchService {
 
         return new MultiResponseDto<>(searchResults, searchPage);
     }
+
 }

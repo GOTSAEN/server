@@ -20,10 +20,10 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/advertisement")
-    public ResponseEntity<MultiResponseDto<SearchAdvertisementDto>> searchAdvertisement(@RequestParam String keyword,
+    public ResponseEntity<MultiResponseDto<SearchAdvertisementDto>> searchAdvertisements(@RequestParam String keyword,
                                                       @RequestParam(name = "page", defaultValue = "1") int page,
                                                       @RequestParam(name = "size", defaultValue = "10") int size) {
-        MultiResponseDto<SearchAdvertisementDto> searchedAdvertisement = searchService.searchAdvertisement(keyword, page, size);
+        MultiResponseDto<SearchAdvertisementDto> searchedAdvertisement = searchService.searchAdvertisements(keyword, page, size);
 
         PageInfo pageInfo = searchedAdvertisement.getPageInfo();
         HttpHeaders headers = new HttpHeaders();
