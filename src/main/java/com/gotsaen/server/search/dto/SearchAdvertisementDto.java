@@ -11,6 +11,9 @@ public class SearchAdvertisementDto {
     private String productName;
     private Long numberOfRecruit;
     private String category;
+
     @Setter
     private int numberOfApplicants;
+    @Setter
+    private String imageUrl;
 }
