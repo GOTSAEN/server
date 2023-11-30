@@ -20,7 +20,7 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
    Page<Advertisement> findByStatusAndMemberId(Advertisement.Status status, Long memberId, Pageable pageable);
    Optional<Advertisement> findByAdvertisementIdAndMemberId(Long advertisementId, Long memberId);
    List<Advertisement> findByEndDateLessThan(Date date);
-   Page<Advertisement> findByProductNameContainingIgnoreCase(String keyword, Pageable pageable);
+   Page<Advertisement> findByStatusAndProductNameContainingIgnoreCase(Advertisement.Status status, String keyword, Pageable pageable);
    Page<Advertisement> findByEndDateBetweenAndStatus(Date currentDate, Date fiveDaysLater, Advertisement.Status status, Pageable pageable);
 
 }
