@@ -28,7 +28,16 @@ public class SearchService {
         Page<Advertisement> searchPage = advertisementRepository.findByProductNameContainingIgnoreCase(keyword, pageable);
 
         List<SearchAdvertisementDto> searchResults = searchPage.getContent().stream()
-                .map(searchMapper::advertisementToSearchAdvertisementDto)
+                .map(advertisement -> {
+                    SearchAdvertisementDto searchAdvertisementDto = searchMapper.advertisementToSearchAdvertisementDto(advertisement);
+
+                    // 이미지 URL 설정
+                    if (!advertisement.getImageUrlList().isEmpty()) {
+                        searchAdvertisementDto.setImageUrl(advertisement.getImageUrlList().get(0));
+                    }
+
+                    return searchAdvertisementDto;
+                })
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(searchResults, searchPage);
