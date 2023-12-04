@@ -31,7 +31,7 @@ public enum ExceptionCode {
     REPORT_NOT_FOUND(404, "제보를 찾을 수 없습니다"),
     CANNOT_END_WITH_REJECTION(403, "반려된 지원서가 존재하는 경우 광고를 종료할 수 없습니다"),
     INVALID_DATE_RANGE(400,"유효하지 않은 날짜 범위입니다. 시작일은 종료일보다 빨라야 합니다"),
-    INVALID_START_DATE(400,"유효하지 않은 시작일입니다. 광고 시작일은 현재 날짜보다 빨라야 합니다");
+    INVALID_START_DATE(403,"시작일은 현재일보다 과거일 수 없습니다");
 
 
 
