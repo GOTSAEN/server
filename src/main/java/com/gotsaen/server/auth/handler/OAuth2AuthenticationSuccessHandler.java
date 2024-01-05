@@ -112,7 +112,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .newInstance()
                 .scheme("https")
                 .host("youad.store")
-                .port("3000")
                 .path("/")
                 .queryParams(queryParams)
                 .build()
