@@ -111,7 +111,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         return UriComponentsBuilder
                 .newInstance()
                 .scheme("https")
-                .host("youad.store")
+                .host("www.youad.store")
                 .path("/")
                 .queryParams(queryParams)
                 .build()
